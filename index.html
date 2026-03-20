@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proteinara — No hype. Eat real bread.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Montserrat:wght@300;400;500;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --brown:  #68200b;
+      --peach:  #f8d8c6;
+      --orange: #fb9d00;
+      --gold:   #e0a93a;
+      --cream:  #fffdf6;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Montserrat', sans-serif; background: var(--peach); color: var(--brown); overflow-x: hidden; }
+
+    /* ─── NAV ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: var(--peach);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 56px; height: 124px;
+      transition: height 0.25s, box-shadow 0.25s;
+    }
+    nav.scrolled { height: 72px; box-shadow: 0 2px 12px rgba(104,32,11,0.1); }
+
+    /* Logo — cursive script rendered via CSS mask (matches Figma mask group) */
+    .nav-logo { text-decoration: none; flex-shrink: 0; display: block; }
+    .nav-logo-img {
+      width: 227px; height: 100px;
+      background-color: var(--brown);
+      -webkit-mask-image: url('https://www.figma.com/api/mcp/asset/a36b0b2b-101e-4f69-a18c-7b3dd281511c');
+              mask-image: url('https://www.figma.com/api/mcp/asset/a36b0b2b-101e-4f69-a18c-7b3dd281511c');
+      -webkit-mask-size: 247px 242px;
+              mask-size: 247px 242px;
+      -webkit-mask-position: -7px -71px;
+              mask-position: -7px -71px;
+      -webkit-mask-repeat: no-repeat;
+              mask-repeat: no-repeat;
+    }
+
+    /* Right side: links + CTA */
+    .nav-links { display: flex; align-items: center; gap: 80px; }
+    .nav-links a {
+      font-weight: 500; font-size: 14px;
+      letter-spacing: 1.69px; text-transform: uppercase;
+      color: var(--brown); text-decoration: none;
+      transition: opacity 0.2s; white-space: nowrap;
+    }
+    .nav-links a:hover { opacity: 0.6; }
+    .nav-links a:hover.btn-order { opacity: 1; }
+
+    /* ORDER NOW button — exact Figma spec */
+    .nav-links .btn-order { color: var(--cream); }
+    .btn-order {
+      background: var(--brown); color: var(--cream);
+      font-family: 'Montserrat', sans-serif; font-weight: 500;
+      font-size: 14px; letter-spacing: 0.864px; text-transform: uppercase;
+      border: none; border-radius: 4px;
+      height: 48px; padding: 0 34px;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; text-decoration: none; white-space: nowrap;
+      transition: opacity 0.2s; flex-shrink: 0;
+    }
+    .btn-order:hover { background: #fff; color: var(--brown); opacity: 1; }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative; height: 1050px;
+      overflow: hidden; margin-top: 124px;
+    }
+    /* Background image — bright flat-lay, no filter */
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: url('https://www.figma.com/api/mcp/asset/54a279e2-32ea-4a28-ba79-764cc79d97ff') center/cover no-repeat;
+      mix-blend-mode: multiply;
+    }
+    /* Headline — absolute, vertically centred at 387px from section top */
+    .hero-text {
+      position: absolute; left: 100px; top: 387px;
+      transform: translateY(-50%);
+      z-index: 2;
+    }
+    .hero-text h1 {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: 80px; line-height: 90px;
+      color: #fff; text-shadow: 0 4px 4px rgba(0,0,0,0.5);
+      white-space: nowrap;
+    }
+    /* "Try now" badge — gold circle with baker character */
+    .hero-badge {
+      position: fixed; left: 100px; top: 680px; z-index: 200;
+      width: 180px; height: 180px;
+      text-decoration: none; display: block;
+      cursor: grab; user-select: none;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .hero-badge:hover { transform: rotate(-5deg); }
+    .hero-badge.dragging { cursor: grabbing; transform: rotate(-8deg) scale(1.06); transition: none; }
+    .hero-badge-circle {
+      position: absolute; inset: 0;
+    }
+    .hero-badge-circle img {
+      width: 100%; height: 100%; object-fit: contain; display: block;
+    }
+    .hero-badge-char {
+      position: absolute;
+      left: 29%; top: 43%;
+      width: 42%; height: 42%; overflow: hidden;
+    }
+    .hero-badge-label {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; pointer-events: none;
+    }
+    .hero-badge-char img {
+      position: absolute;
+      width: 212.17%; height: 172.68%;
+      left: -52.13%; top: -16.69%;
+      max-width: none;
+    }
+
+    /* ─── MARQUEE ─── */
+    .marquee-bar { background: var(--brown); padding: 14px 0; overflow: hidden; }
+    .marquee-track {
+      display: flex; gap: 64px; align-items: center;
+      width: max-content;
+      animation: marqueeScroll 28s linear infinite;
+    }
+    .marquee-bar:hover .marquee-track { animation-play-state: paused; }
+    .marquee-track span {
+      font-family: 'DM Sans', sans-serif; font-weight: 500;
+      font-size: 12.5px; letter-spacing: 2.25px; text-transform: uppercase;
+      color: var(--gold); white-space: nowrap; flex-shrink: 0;
+    }
+    .marquee-track .dot { color: rgba(255,253,246,0.5); }
+    @keyframes marqueeScroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ─── ABOUT ─── */
+    .section-about {
+      background: #fff;
+      display: grid; grid-template-columns: 1fr 1fr;
+      align-items: center; padding: 100px 7%;
+    }
+    .about-img {
+      width: 100%; aspect-ratio: 3/2;
+      object-fit: cover; border-radius: 4px;
+      display: block;
+    }
+    .about-text { padding-left: 8%; }
+    .label {
+      font-weight: 700; font-size: 13px;
+      letter-spacing: 3.2px; text-transform: uppercase;
+      color: var(--orange); display: block; margin-bottom: 12px;
+    }
+    .about-text h2 {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: clamp(30px, 3vw, 50px); line-height: 1.18;
+      color: #000; margin-bottom: 20px;
+    }
+    .about-text p {
+      font-size: 15px; line-height: 1.8;
+      color: var(--brown); margin-bottom: 28px;
+    }
+    .checklist { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .checklist li { display: flex; align-items: center; gap: 12px; font-size: 15px; color: var(--brown); }
+    .check {
+      width: 24px; height: 24px; border-radius: 12px;
+      background: var(--orange); flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--cream);
+    }
+
+    /* ─── PRODUCTS ─── */
+    .section-products {
+      background: var(--peach); padding: 100px 56px;
+      display: flex; flex-direction: column; align-items: center; gap: 80px;
+    }
+    .section-products h2 {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: clamp(30px, 3vw, 50px); color: #000; text-align: center;
+    }
+    .products-grid {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      gap: 24px; width: 100%; max-width: 1811px;
+    }
+    .product-card {
+      background: #fff; border-radius: 20px; padding: 24px;
+      display: flex; flex-direction: column; align-items: center; gap: 16px;
+      flex: 1; position: relative; overflow: visible;
+      transition: transform 0.4s cubic-bezier(.22,.68,0,1.2), box-shadow 0.4s ease;
+      cursor: pointer;
+    }
+    .product-card::before {
+      content: ''; position: absolute; inset: 0; border-radius: 20px;
+      background: linear-gradient(160deg, rgba(251,157,0,0.07) 0%, transparent 60%);
+      opacity: 0; transition: opacity 0.4s ease; pointer-events: none;
+    }
+    .product-card:hover { transform: translateY(-14px); box-shadow: 0 24px 60px rgba(104,32,11,0.16); }
+    .product-card:hover::before { opacity: 1; }
+
+    .product-header { display: flex; align-items: center; gap: 16px; justify-content: center; width: 100%; }
+    .product-header h3 {
+      font-family: 'Playfair Display', serif; font-weight: 600; font-size: 32px; color: #000;
+      transition: color 0.3s;
+    }
+    .product-card:hover .product-header h3 { color: var(--brown); }
+    .product-price {
+      font-family: 'Playfair Display', serif; font-weight: 700; font-size: 22px; color: var(--orange);
+      transition: transform 0.3s;
+    }
+    .product-card:hover .product-price { transform: scale(1.15); }
+
+    /* Figma-style masked circular image with floating effect */
+    .product-img-wrap {
+      position: relative; width: 226px; height: 301px;
+      margin-top: -49px; flex-shrink: 0;
+      -webkit-mask-image: url('https://www.figma.com/api/mcp/asset/4c31d31f-28b3-430a-ac9d-5a53c9cc75bc');
+              mask-image: url('https://www.figma.com/api/mcp/asset/4c31d31f-28b3-430a-ac9d-5a53c9cc75bc');
+      -webkit-mask-position: 14px 49px;
+              mask-position: 14px 49px;
+      -webkit-mask-size: 200px 200px;
+              mask-size: 200px 200px;
+      -webkit-mask-repeat: no-repeat;
+              mask-repeat: no-repeat;
+      transition: transform 0.45s cubic-bezier(.22,.68,0,1.2);
+    }
+    .product-card:hover .product-img-wrap { transform: scale(1.08) translateY(-6px); }
+    .product-img {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+      object-fit: cover; display: block;
+      transition: transform 0.45s ease;
+    }
+    .product-card:hover .product-img { transform: scale(1.06); }
+
+    .product-desc {
+      font-size: 12px; line-height: 22px; color: var(--brown); text-align: center;
+    }
+    .btn-cart {
+      background: var(--brown); color: #fff;
+      font-family: 'Montserrat', sans-serif; font-weight: 500; font-size: 12px;
+      text-align: center; border: none; border-radius: 4px; padding: 10px 20px;
+      cursor: pointer; display: block; width: 100%;
+      transform: translateY(4px); opacity: 0.85;
+      transition: background 0.3s, transform 0.35s cubic-bezier(.22,.68,0,1.2), opacity 0.3s, box-shadow 0.3s;
+    }
+    .product-card:hover .btn-cart {
+      background: var(--orange); transform: translateY(0); opacity: 1;
+      box-shadow: 0 6px 20px rgba(251,157,0,0.35);
+    }
+
+    /* ─── PROCESS ─── */
+    .section-process { background: var(--brown); padding: 100px 7%; text-align: center; }
+    .section-process .label { color: var(--orange); }
+    .section-process h2 {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: clamp(30px, 3vw, 50px); color: var(--cream);
+      margin-bottom: 60px;
+    }
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 48px; max-width: 1200px; margin: 0 auto;
+    }
+    .step { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .step-num {
+      width: 72px; height: 72px; border-radius: 36px;
+      border: 1px solid rgba(224,169,58,0.5);
+      background: rgba(196,138,46,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: 26px; color: var(--gold);
+    }
+    .step h3 { font-family: 'Playfair Display', serif; font-weight: 400; font-size: 18px; color: var(--cream); }
+    .step p { font-weight: 300; font-size: 13.5px; line-height: 1.65; color: var(--cream); }
+
+    /* ─── GALLERY ─── */
+    .section-gallery {
+      display: grid;
+      grid-template-columns: 534fr 673fr 534fr;
+      gap: 36px;
+      padding: 36px;
+      background: var(--peach);
+    }
+    .gal-img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gal-tall { height: 713px; }
+    .gal-center {
+      display: flex; flex-direction: column; gap: 36px;
+    }
+    .gal-center .gal-img { height: 339px; flex-shrink: 0; }
+
+    /* ─── NEWSLETTER / FOOTER ─── */
+    .section-footer { background: #000; padding: 80px 5%; text-align: center; }
+    .section-footer h2 {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: clamp(32px, 3vw, 50px); color: var(--cream);
+      margin-bottom: 14px;
+    }
+    .section-footer > p {
+      font-weight: 300; font-size: 15px;
+      color: rgba(255,253,246,0.85); margin-bottom: 36px;
+    }
+    .email-form { display: flex; max-width: 480px; margin: 0 auto 56px; }
+    .email-input {
+      flex: 1; background: rgba(255,253,246,0.95);
+      border: none; padding: 15px 20px;
+      font-family: 'Montserrat', sans-serif; font-size: 14px;
+      border-radius: 4px 0 0 4px; outline: none; color: #333;
+    }
+    .email-input::placeholder { color: #757575; }
+    .btn-sub {
+      background: #fb9d00; color: #fffdf6;
+      font-family: 'Montserrat', sans-serif; font-weight: 500; font-size: 14.4px;
+      text-align: center; white-space: nowrap;
+      border: none; padding: 15px 28px;
+      border-radius: 0 4px 4px 0; cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    .btn-sub:hover { opacity: 0.88; }
+    .footer-bottom {
+      border-top: 1px solid rgba(255,255,255,0.15);
+      padding-top: 28px;
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1760px; margin: 0 auto;
+    }
+    .footer-bottom span, .footer-links a {
+      font-weight: 700; font-size: 12px; color: #fff; text-decoration: none;
+    }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a:hover { opacity: 0.7; }
+
+    /* ─── TOAST ─── */
+    .toast {
+      position: fixed; bottom: 32px; right: 32px; z-index: 999;
+      background: var(--brown); color: var(--cream);
+      font-weight: 500; font-size: 14px;
+      padding: 14px 24px; border-radius: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.22);
+      transform: translateY(80px); opacity: 0;
+      transition: transform 0.35s ease, opacity 0.35s ease;
+      pointer-events: none;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1200px) {
+      .nav-links { gap: 40px; }
+    }
+    @media (max-width: 980px) {
+      nav { padding: 0 24px; height: 88px; }
+      nav.scrolled { height: 64px; }
+      .hero { margin-top: 88px; height: auto; min-height: 600px; }
+      .hero-text { left: 32px; top: 260px; }
+      .hero-text h1 { font-size: 48px; line-height: 58px; }
+      .hero-badge { left: 32px; top: 400px; transform: scale(0.75); transform-origin: left top; }
+      .nav-links { gap: 24px; }
+      .section-about { grid-template-columns: 1fr; padding: 60px 6%; }
+      .about-text { padding-left: 0; margin-top: 40px; }
+      .products-grid { flex-direction: column; align-items: center; max-width: 480px; margin: 0 auto; }
+      .steps-grid { grid-template-columns: 1fr; }
+      .section-gallery { grid-template-columns: 1fr; grid-template-rows: auto; }
+      .gal-tall { grid-row: auto; height: 360px; }
+    }
+    @media (max-width: 640px) {
+      .nav-links > a { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <a class="nav-logo" href="#" aria-label="Proteinara">
+    <div class="nav-logo-img"></div>
+  </a>
+  <div class="nav-links">
+    <a href="#about">Our Story</a>
+    <a href="#shop">Shop</a>
+    <a href="#process">Process</a>
+    <a href="#contact">Contact</a>
+    <a class="btn-order" href="#shop">Order Now</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-text">
+    <h1>No hype.<br>Eat real bread.</h1>
+  </div>
+  <a class="hero-badge" href="#shop" aria-label="Try now">
+    <div class="hero-badge-circle">
+      <img src="https://www.figma.com/api/mcp/asset/20368721-2932-4e41-b197-02aa88412544" alt="" />
+    </div>
+    <div class="hero-badge-char">
+      <img src="https://www.figma.com/api/mcp/asset/5b3a4ebe-bdb2-4e74-9734-c21fc3b785e0" alt="Baker character" />
+    </div>
+    <!-- "Try now" curved text along top arc of the circle -->
+    <svg class="hero-badge-label" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <path id="topArc" d="M 22,90 A 68,68 0 0,1 158,90" />
+      </defs>
+      <text font-family="'Playfair Display', serif" font-weight="700" font-size="18" fill="#1a0a00" letter-spacing="1">
+        <textPath href="#topArc" startOffset="50%" text-anchor="middle">Try now</textPath>
+      </text>
+    </svg>
+  </a>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-bar" aria-hidden="true">
+  <div class="marquee-track" id="marquee">
+    <span>High-Protein Baking</span><span class="dot">·</span>
+    <span>Artisan Quality</span><span class="dot">·</span>
+    <span>Real Ingredients</span><span class="dot">·</span>
+    <span>Baked Fresh Daily</span><span class="dot">·</span>
+    <span>No Additives</span><span class="dot">·</span>
+    <span>Taste &amp; Nutrition</span><span class="dot">·</span>
+    <span>High-Protein Baking</span><span class="dot">·</span>
+    <span>Artisan Quality</span><span class="dot">·</span>
+    <span>Real Ingredients</span><span class="dot">·</span>
+    <span>Baked Fresh Daily</span><span class="dot">·</span>
+    <span>No Additives</span><span class="dot">·</span>
+    <span>Taste &amp; Nutrition</span><span class="dot">·</span>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section class="section-about" id="about">
+  <img class="about-img"
+    src="https://www.figma.com/api/mcp/asset/0d1723e3-3971-427d-b143-02005cd9ace8"
+    alt="Hands working with bread dough" />
+  <div class="about-text">
+    <span class="label">Our Story</span>
+    <h2>Good bread should nourish as much as it delights.</h2>
+    <p>We created Proteinara because we refused to choose between great taste and real nutrition. Every loaf is crafted with premium flours, whole seeds, and clean protein sources — nothing artificial, nothing unnecessary.</p>
+    <ul class="checklist">
+      <li><span class="check">✓</span>28–35g of protein per full loaf</li>
+      <li><span class="check">✓</span>Crafted with local ingredients</li>
+      <li><span class="check">✓</span>No artificial preservatives or additives</li>
+      <li><span class="check">✓</span>Baked fresh and delivered to your door</li>
+      <li><span class="check">✓</span>Dietitian-approved macros</li>
+      <li><span class="check">✓</span>Gluten Free</li>
+    </ul>
+  </div>
+</section>
+
+<!-- PRODUCTS -->
+<section class="section-products" id="shop">
+  <h2>Perfect Protein Bread for Every Lifestyle</h2>
+  <div class="products-grid">
+
+    <div class="product-card">
+      <div class="product-header">
+        <h3>Oat Fuel</h3>
+        <span class="product-price">€12</span>
+      </div>
+      <div class="product-img-wrap">
+        <img class="product-img"
+          src="https://www.figma.com/api/mcp/asset/ae6d79b0-e73b-452e-8774-9bc37057a272"
+          alt="Oat Fuel loaf" />
+      </div>
+      <p class="product-desc">
+        Everyday bread, done properly.<br>
+        High-protein bread made with oats and real ingredients you recognize.<br>
+        Soft on the inside, with just enough structure to carry you through the day.<br>
+        No additives. No shortcuts. Just real, functional bread.
+      </p>
+      <button class="btn-cart" onclick="addToCart('Oat Fuel')">Add to Cart</button>
+    </div>
+
+    <div class="product-card">
+      <div class="product-header">
+        <h3>Brownie Fuel</h3>
+        <span class="product-price">€10</span>
+      </div>
+      <div class="product-img-wrap">
+        <img class="product-img"
+          src="https://www.figma.com/api/mcp/asset/ebfa910e-ca2f-454f-b586-be8ee5394c2e"
+          alt="Brownie Fuel loaf" />
+      </div>
+      <p class="product-desc">
+        Indulgence, without compromise.<br>
+        Rich, chocolatey, and packed with protein — this is what happens when
+        performance meets comfort. Dense, satisfying, and made from real ingredients.<br>
+        No unnecessary sugar spikes. No nonsense.
+      </p>
+      <button class="btn-cart" onclick="addToCart('Brownie Fuel')">Add to Cart</button>
+    </div>
+
+    <div class="product-card">
+      <div class="product-header">
+        <h3>Banana Fuel</h3>
+        <span class="product-price">€10</span>
+      </div>
+      <div class="product-img-wrap">
+        <img class="product-img"
+          src="https://www.figma.com/api/mcp/asset/531f0982-5403-48e4-be29-ccf44fd39539"
+          alt="Banana Fuel loaf" />
+      </div>
+      <p class="product-desc">
+        Naturally sweet. Seriously functional.<br>
+        Made with real bananas and high-quality protein for a soft,
+        balanced loaf that works any time of day.<br>
+        Comforting, simple, and built to fuel you — not slow you down.
+      </p>
+      <button class="btn-cart" onclick="addToCart('Banana Fuel')">Add to Cart</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="section-process" id="process">
+  <span class="label">The Process</span>
+  <h2>From protein to performance</h2>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Protein Blend</h3>
+      <p>We combine whole-grain flours with high-quality protein and fresh cottage cheese, creating a nutrient-dense base in small batches.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Stone Bake &amp; Drying</h3>
+      <p>Each loaf is baked on stone, then gently dried in the oven to remove excess moisture — creating a firmer structure, richer texture, and naturally extending freshness without additives.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Fresh Delivery &amp; Storage</h3>
+      <p>Because we use real cottage cheese, our bread is naturally perishable. Keep it refrigerated to maintain freshness, extend shelf life, and preserve its full nutritional value.</p>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="section-gallery">
+  <img class="gal-img gal-tall"
+    src="https://www.figma.com/api/mcp/asset/9e70fc21-e269-4091-921b-5c491ed059ff"
+    alt="Bread on wooden stand" />
+  <div class="gal-center">
+    <img class="gal-img"
+      src="https://www.figma.com/api/mcp/asset/757859d9-eca2-4304-b3f9-78d913f222ee"
+      alt="Protein powder product" />
+    <img class="gal-img"
+      src="https://www.figma.com/api/mcp/asset/b17295ae-9b2c-412f-b92d-8c4c3ec2bff9"
+      alt="Baker working with bread" />
+  </div>
+  <img class="gal-img gal-tall"
+    src="https://www.figma.com/api/mcp/asset/6b8bd2ae-fab3-4ae8-a2fa-709e7ac3277c"
+    alt="Bakery shop" />
+</section>
+
+<!-- NEWSLETTER + FOOTER -->
+<section class="section-footer" id="contact">
+  <h2>Stay in the loop</h2>
+  <p>Get new flavours, exclusive offers, and fresh baking stories delivered to your inbox.</p>
+  <form class="email-form" onsubmit="handleSubscribe(event)">
+    <input class="email-input" type="email" placeholder="your@email.com" required />
+    <button class="btn-sub" type="submit">Subscribe</button>
+  </form>
+  <div class="footer-bottom">
+    <span>© 2026 Proteinara. All rights reserved.</span>
+    <div class="footer-links">
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Use</a>
+    </div>
+  </div>
+</section>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  /* draggable badge */
+  (function() {
+    const badge = document.querySelector('.hero-badge');
+    let dragging = false, ox = 0, oy = 0;
+    badge.addEventListener('mousedown', e => {
+      e.preventDefault();
+      dragging = true;
+      badge.classList.add('dragging');
+      const r = badge.getBoundingClientRect();
+      ox = e.clientX - r.left;
+      oy = e.clientY - r.top;
+    });
+    document.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      badge.style.left = (e.clientX - ox) + 'px';
+      badge.style.top  = (e.clientY - oy) + 'px';
+    });
+    document.addEventListener('mouseup', () => {
+      dragging = false;
+      badge.classList.remove('dragging');
+    });
+    /* touch */
+    badge.addEventListener('touchstart', e => {
+      const t = e.touches[0];
+      dragging = true;
+      badge.classList.add('dragging');
+      const r = badge.getBoundingClientRect();
+      ox = t.clientX - r.left;
+      oy = t.clientY - r.top;
+    }, { passive: true });
+    document.addEventListener('touchmove', e => {
+      if (!dragging) return;
+      const t = e.touches[0];
+      badge.style.left = (t.clientX - ox) + 'px';
+      badge.style.top  = (t.clientY - oy) + 'px';
+    }, { passive: true });
+    document.addEventListener('touchend', () => {
+      dragging = false;
+      badge.classList.remove('dragging');
+    });
+  })();
+
+  /* sticky nav */
+  const navEl = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    navEl.classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+
+  /* duplicate marquee for seamless loop */
+  const m = document.getElementById('marquee');
+  m.innerHTML += m.innerHTML;
+
+  /* toast helper */
+  let timer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(timer);
+    timer = setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  function addToCart(name) { showToast(`${name} added to cart!`); }
+
+  function handleSubscribe(e) {
+    e.preventDefault();
+    const inp = e.target.querySelector('input');
+    showToast(`Thanks! We'll be in touch at ${inp.value}`);
+    inp.value = '';
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+# Editor / IDE
+.DS_Store
+*.swp
+*.swo
+
+# Claude / Cursor
+.claude/
