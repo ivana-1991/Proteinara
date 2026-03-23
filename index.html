@@ -336,6 +336,29 @@
     .footer-links a:hover { opacity: 0.7; }
 
     /* ─── TOAST ─── */
+    /* ─── CART BANNER ─── */
+    .cart-banner {
+      position: fixed; top: 50%; left: 50%; z-index: 9999;
+      transform: translate(-50%, -50%) scale(0.6);
+      background: var(--brown); color: #fff;
+      font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 22px;
+      padding: 22px 48px; border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(104,32,11,0.45);
+      display: flex; align-items: center; gap: 14px;
+      opacity: 0; pointer-events: none;
+      transition: transform 0.4s cubic-bezier(.22,.68,0,1.3), opacity 0.3s ease;
+      white-space: nowrap;
+    }
+    .cart-banner.show {
+      opacity: 1; transform: translate(-50%, -50%) scale(1);
+    }
+    .cart-banner-check {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--orange); color: #fff;
+      font-size: 20px; font-weight: 700; flex-shrink: 0;
+    }
+
     .toast {
       position: fixed; bottom: 32px; right: 32px; z-index: 999;
       background: var(--brown); color: var(--cream);
@@ -347,6 +370,196 @@
       pointer-events: none;
     }
     .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ─── ORDER PAGE ─── */
+    .order-page {
+      position: fixed; inset: 0; z-index: 500;
+      background: var(--cream);
+      transform: translateX(100%);
+      transition: transform 0.55s cubic-bezier(.77,0,.18,1);
+      overflow-y: auto; overflow-x: hidden;
+      display: flex; flex-direction: column;
+    }
+    .order-page.open { transform: translateX(0); }
+
+    .order-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 56px; height: 80px; flex-shrink: 0;
+      border-bottom: 1px solid rgba(104,32,11,0.12);
+      background: var(--cream);
+      position: sticky; top: 0; z-index: 10;
+    }
+    .order-nav-left {
+      display: flex; align-items: center; gap: 20px;
+    }
+    .order-nav-divider {
+      width: 1px; height: 32px; background: rgba(104,32,11,0.2); flex-shrink: 0;
+    }
+    .order-nav-title {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: 22px; color: var(--brown);
+    }
+    .order-close {
+      width: 44px; height: 44px; border-radius: 50%;
+      border: 2px solid var(--brown); background: transparent;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s, color 0.2s;
+      color: var(--brown); font-size: 20px; line-height: 1;
+    }
+    .order-close:hover { background: var(--brown); color: #fff; }
+
+    .order-body {
+      display: grid; grid-template-columns: 1fr 380px;
+      gap: 0; flex: 1; max-width: 1400px; margin: 0 auto;
+      width: 100%; padding: 0 56px 80px;
+    }
+
+    /* Left — form */
+    .order-form-col { padding: 48px 48px 0 0; border-right: 1px solid rgba(104,32,11,0.1); }
+
+    .order-section-title {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: 26px; color: var(--brown); margin-bottom: 24px;
+    }
+
+    /* Product picker */
+    .order-products { display: flex; flex-direction: column; gap: 16px; margin-bottom: 48px; }
+    .order-product {
+      display: flex; align-items: center; gap: 20px;
+      background: #fff; border-radius: 14px; padding: 16px 20px;
+      border: 2px solid transparent;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .order-product.selected { border-color: var(--orange); box-shadow: 0 4px 20px rgba(251,157,0,0.15); }
+    .order-product-img {
+      width: 64px; height: 64px; border-radius: 10px;
+      object-fit: cover; flex-shrink: 0;
+    }
+    .order-product-info { flex: 1; min-width: 0; }
+    .order-product-name {
+      font-family: 'Playfair Display', serif; font-weight: 600;
+      font-size: 17px; color: var(--brown); margin-bottom: 2px;
+    }
+    .order-product-price { font-size: 13px; color: var(--orange); font-weight: 700; }
+    .qty-control {
+      display: flex; align-items: center; gap: 0; flex-shrink: 0;
+      border: 1.5px solid rgba(104,32,11,0.2); border-radius: 8px; overflow: hidden;
+    }
+    .qty-btn {
+      width: 36px; height: 36px; border: none; background: transparent;
+      font-size: 18px; font-weight: 700; color: var(--brown);
+      cursor: pointer; transition: background 0.15s; display: flex;
+      align-items: center; justify-content: center;
+    }
+    .qty-btn:hover { background: var(--peach); }
+    .qty-num {
+      width: 36px; text-align: center; font-weight: 700;
+      font-size: 15px; color: var(--brown); background: transparent;
+      border: none; border-left: 1.5px solid rgba(104,32,11,0.2);
+      border-right: 1.5px solid rgba(104,32,11,0.2);
+      pointer-events: none;
+    }
+
+    /* Customer form */
+    .order-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .order-fields.full { grid-template-columns: 1fr; }
+    .field-group { display: flex; flex-direction: column; gap: 6px; }
+    .field-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; color: var(--brown); opacity: 0.6;
+    }
+    .field-input {
+      background: #fff; border: 1.5px solid rgba(104,32,11,0.18);
+      border-radius: 8px; padding: 12px 16px;
+      font-family: 'Montserrat', sans-serif; font-size: 14px; color: var(--brown);
+      outline: none; transition: border-color 0.2s;
+      width: 100%;
+    }
+    .field-input:focus { border-color: var(--orange); }
+    .field-input::placeholder { color: rgba(104,32,11,0.35); }
+    .field-note { font-size: 11px; color: rgba(104,32,11,0.5); margin-top: 4px; }
+
+    /* Right — summary */
+    .order-summary-col {
+      padding: 48px 0 0 40px;
+      display: flex; flex-direction: column;
+    }
+    .order-summary-sticky { position: sticky; top: 100px; }
+    .order-summary-box {
+      background: #fff; border-radius: 16px; padding: 28px;
+      box-shadow: 0 8px 32px rgba(104,32,11,0.08);
+      margin-bottom: 20px;
+    }
+    .summary-title {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: 20px; color: var(--brown); margin-bottom: 20px;
+      padding-bottom: 16px; border-bottom: 1px solid rgba(104,32,11,0.1);
+    }
+    .summary-lines { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+    .summary-line {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 14px; color: var(--brown);
+    }
+    .summary-line .s-name { font-weight: 500; }
+    .summary-line .s-price { font-weight: 700; }
+    .summary-empty {
+      font-size: 13px; color: rgba(104,32,11,0.4); text-align: center;
+      padding: 20px 0;
+    }
+    .summary-divider { border: none; border-top: 1px solid rgba(104,32,11,0.1); margin: 0 0 16px; }
+    .summary-total {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 18px; font-weight: 700; color: var(--brown);
+    }
+    .summary-total-price { color: var(--orange); font-size: 22px; }
+
+    .btn-place-order {
+      width: 100%; background: var(--brown); color: #fff;
+      font-family: 'Montserrat', sans-serif; font-weight: 700;
+      font-size: 15px; letter-spacing: 0.5px; text-transform: uppercase;
+      border: none; border-radius: 10px; padding: 18px;
+      cursor: pointer; transition: background 0.2s, transform 0.15s;
+    }
+    .btn-place-order:hover { background: var(--orange); transform: translateY(-1px); }
+    .btn-place-order:disabled { background: rgba(104,32,11,0.3); cursor: not-allowed; transform: none; }
+    .order-notice {
+      font-size: 11px; color: rgba(104,32,11,0.5); text-align: center;
+      margin-top: 12px; line-height: 1.6;
+    }
+
+    /* Success state */
+    .order-success {
+      display: none; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 80px 40px; flex: 1;
+    }
+    .order-success.visible { display: flex; }
+    .order-success-icon {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: var(--orange); display: flex; align-items: center; justify-content: center;
+      font-size: 40px; color: #fff; margin-bottom: 28px;
+      animation: popIn 0.5s cubic-bezier(.22,.68,0,1.6) forwards;
+    }
+    @keyframes popIn {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    .order-success h2 {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: 40px; color: var(--brown); margin-bottom: 14px;
+    }
+    .order-success p {
+      font-size: 16px; color: rgba(104,32,11,0.7); line-height: 1.7; max-width: 420px;
+    }
+
+    /* Order page responsive */
+    @media (max-width: 900px) {
+      .order-body { grid-template-columns: 1fr; padding: 0 24px 80px; }
+      .order-form-col { padding: 32px 0 0; border-right: none; }
+      .order-summary-col { padding: 0; }
+      .order-summary-sticky { position: static; }
+      .order-nav { padding: 0 24px; }
+      .order-fields { grid-template-columns: 1fr; }
+    }
 
     /* ─── RESPONSIVE ─── */
     @media (max-width: 1200px) {
@@ -384,7 +597,7 @@
     <a href="#shop">Shop</a>
     <a href="#process">Process</a>
     <a href="#contact">Contact</a>
-    <a class="btn-order" href="#shop">Order Now</a>
+    <button class="btn-order" onclick="openOrderPage()">Order Now <span id="cart-count" style="display:none;background:#fff;color:var(--brown);border-radius:50%;padding:1px 7px;font-size:11px;font-weight:700;margin-left:4px;">0</span></button>
   </div>
 </nav>
 
@@ -396,18 +609,18 @@
   </div>
   <a class="hero-badge" href="#shop" aria-label="Try now">
     <div class="hero-badge-circle">
-      <img src="https://www.figma.com/api/mcp/asset/20368721-2932-4e41-b197-02aa88412544" alt="" />
+      <img src="https://www.figma.com/api/mcp/asset/f07d3bb9-c214-4b01-9c64-07fb0b889590" alt="" />
     </div>
     <div class="hero-badge-char">
-      <img src="https://www.figma.com/api/mcp/asset/5b3a4ebe-bdb2-4e74-9734-c21fc3b785e0" alt="Baker character" />
+      <img src="https://www.figma.com/api/mcp/asset/5a3a9318-35d9-483a-ba8e-f5734d986f07" alt="Baker character" />
     </div>
-    <!-- "Try now" curved text along top arc of the circle -->
+    <!-- "Catch the Bread" curved text along top arc of the circle -->
     <svg class="hero-badge-label" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <path id="topArc" d="M 22,90 A 68,68 0 0,1 158,90" />
+        <path id="topArc" d="M 18,90 A 72,72 0 0,1 162,90" />
       </defs>
-      <text font-family="'Playfair Display', serif" font-weight="700" font-size="18" fill="#1a0a00" letter-spacing="1">
-        <textPath href="#topArc" startOffset="50%" text-anchor="middle">Try now</textPath>
+      <text font-family="'Playfair Display', serif" font-weight="700" font-size="15" fill="#1a0a00" letter-spacing="0.5">
+        <textPath href="#topArc" startOffset="50%" text-anchor="middle">Catch the Bread</textPath>
       </text>
     </svg>
   </a>
@@ -472,7 +685,7 @@
         Soft on the inside, with just enough structure to carry you through the day.<br>
         No additives. No shortcuts. Just real, functional bread.
       </p>
-      <button class="btn-cart" onclick="addToCart('Oat Fuel')">Add to Cart</button>
+      <button class="btn-cart" onclick="addToCart('Oat Fuel', event)">Add to Cart</button>
     </div>
 
     <div class="product-card">
@@ -491,7 +704,7 @@
         performance meets comfort. Dense, satisfying, and made from real ingredients.<br>
         No unnecessary sugar spikes. No nonsense.
       </p>
-      <button class="btn-cart" onclick="addToCart('Brownie Fuel')">Add to Cart</button>
+      <button class="btn-cart" onclick="addToCart('Brownie Fuel', event)">Add to Cart</button>
     </div>
 
     <div class="product-card">
@@ -510,7 +723,7 @@
         balanced loaf that works any time of day.<br>
         Comforting, simple, and built to fuel you — not slow you down.
       </p>
-      <button class="btn-cart" onclick="addToCart('Banana Fuel')">Add to Cart</button>
+      <button class="btn-cart" onclick="addToCart('Banana Fuel', event)">Add to Cart</button>
     </div>
 
   </div>
@@ -575,6 +788,145 @@
 </section>
 
 <!-- TOAST -->
+<!-- ORDER PAGE OVERLAY -->
+<div class="order-page" id="order-page" aria-modal="true" role="dialog" aria-label="Place your order">
+
+  <nav class="order-nav">
+    <div class="order-nav-left">
+      <div class="nav-logo-img"></div>
+    </div>
+    <button class="order-close" onclick="closeOrderPage()" aria-label="Close">✕</button>
+  </nav>
+
+  <!-- Main form content -->
+  <div class="order-body" id="order-form-body">
+
+    <!-- Left col -->
+    <div class="order-form-col">
+
+      <h2 class="order-section-title">Choose Your Loaves</h2>
+      <div class="order-products" id="order-products">
+
+        <div class="order-product" id="op-oat">
+          <img class="order-product-img"
+            src="https://www.figma.com/api/mcp/asset/ae6d79b0-e73b-452e-8774-9bc37057a272"
+            alt="Oat Fuel" />
+          <div class="order-product-info">
+            <div class="order-product-name">Oat Fuel</div>
+            <div class="order-product-price">€12 per loaf</div>
+          </div>
+          <div class="qty-control">
+            <button class="qty-btn" onclick="changeQty('oat',-1)">−</button>
+            <span class="qty-num" id="qty-oat">0</span>
+            <button class="qty-btn" onclick="changeQty('oat',1)">+</button>
+          </div>
+        </div>
+
+        <div class="order-product" id="op-brownie">
+          <img class="order-product-img"
+            src="https://www.figma.com/api/mcp/asset/ebfa910e-ca2f-454f-b586-be8ee5394c2e"
+            alt="Brownie Fuel" />
+          <div class="order-product-info">
+            <div class="order-product-name">Brownie Fuel</div>
+            <div class="order-product-price">€10 per loaf</div>
+          </div>
+          <div class="qty-control">
+            <button class="qty-btn" onclick="changeQty('brownie',-1)">−</button>
+            <span class="qty-num" id="qty-brownie">0</span>
+            <button class="qty-btn" onclick="changeQty('brownie',1)">+</button>
+          </div>
+        </div>
+
+        <div class="order-product" id="op-banana">
+          <img class="order-product-img"
+            src="https://www.figma.com/api/mcp/asset/531f0982-5403-48e4-be29-ccf44fd39539"
+            alt="Banana Fuel" />
+          <div class="order-product-info">
+            <div class="order-product-name">Banana Fuel</div>
+            <div class="order-product-price">€10 per loaf</div>
+          </div>
+          <div class="qty-control">
+            <button class="qty-btn" onclick="changeQty('banana',-1)">−</button>
+            <span class="qty-num" id="qty-banana">0</span>
+            <button class="qty-btn" onclick="changeQty('banana',1)">+</button>
+          </div>
+        </div>
+
+      </div>
+
+      <h2 class="order-section-title">Delivery Details</h2>
+      <form id="order-form" onsubmit="submitOrder(event)">
+        <div class="order-fields" style="margin-bottom:16px;">
+          <div class="field-group">
+            <label class="field-label" for="of-name">Full Name</label>
+            <input class="field-input" id="of-name" type="text" placeholder="Ana Kovač" required />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="of-email">Email</label>
+            <input class="field-input" id="of-email" type="email" placeholder="ana@email.com" required />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="of-phone">Phone</label>
+            <input class="field-input" id="of-phone" type="tel" placeholder="+385 91 234 5678" required />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="of-city">City</label>
+            <input class="field-input" id="of-city" type="text" placeholder="Zagreb" required />
+          </div>
+        </div>
+        <div class="order-fields full" style="margin-bottom:16px;">
+          <div class="field-group">
+            <label class="field-label" for="of-address">Street Address</label>
+            <input class="field-input" id="of-address" type="text" placeholder="Ilica 42" required />
+          </div>
+        </div>
+        <div class="order-fields full" style="margin-bottom:0;">
+          <div class="field-group">
+            <label class="field-label" for="of-note">Order Note <span style="font-weight:400;text-transform:none;letter-spacing:0;opacity:0.6;">(optional)</span></label>
+            <input class="field-input" id="of-note" type="text" placeholder="Any allergies, delivery preferences..." />
+          </div>
+        </div>
+      </form>
+
+    </div>
+
+    <!-- Right col — summary -->
+    <div class="order-summary-col">
+      <div class="order-summary-sticky">
+        <div class="order-summary-box">
+          <div class="summary-title">Order Summary</div>
+          <div class="summary-lines" id="summary-lines">
+            <p class="summary-empty" id="summary-empty">No items selected yet.</p>
+          </div>
+          <hr class="summary-divider" />
+          <div class="summary-total">
+            <span>Total</span>
+            <span class="summary-total-price" id="summary-total">€0</span>
+          </div>
+        </div>
+        <button class="btn-place-order" id="btn-place-order" onclick="document.getElementById('order-form').requestSubmit()" disabled>
+          Place Order
+        </button>
+        <p class="order-notice">We'll confirm your order via email within a few hours. Fresh delivery to your door.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Success state -->
+  <div class="order-success" id="order-success">
+    <div class="order-success-icon">✓</div>
+    <h2>Order Placed!</h2>
+    <p>Thank you! We've received your order and will confirm it by email shortly. Your fresh loaves are on their way.</p>
+  </div>
+
+</div>
+
+<canvas id="confetti-canvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9998;"></canvas>
+<div class="cart-banner" id="cart-banner">
+  <span class="cart-banner-check">✓</span>
+  <span id="cart-banner-text">Added to cart!</span>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -630,17 +982,168 @@
   const m = document.getElementById('marquee');
   m.innerHTML += m.innerHTML;
 
-  /* toast helper */
-  let timer;
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    clearTimeout(timer);
-    timer = setTimeout(() => t.classList.remove('show'), 3000);
+  /* ─── CONFETTI ─── */
+  const confettiCanvas = document.getElementById('confetti-canvas');
+  const ctx = confettiCanvas.getContext('2d');
+  const CONF_COLORS = ['#68200b','#fb9d00','#e0a93a','#f8d8c6','#fff','#ff6b6b','#4ecdc4','#f7c59f','#ffbe0b','#8338ec'];
+  let particles = [];
+  let confettiAnim = null;
+
+  function resizeCanvas() {
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+
+  class Particle {
+    constructor(x, y) {
+      this.x = x; this.y = y;
+      this.vx = (Math.random() - 0.5) * 18;
+      this.vy = -(Math.random() * 18 + 8);
+      this.color = CONF_COLORS[Math.floor(Math.random() * CONF_COLORS.length)];
+      this.w = Math.random() * 10 + 5;
+      this.h = Math.random() * 5 + 3;
+      this.life = 1;
+      this.decay = Math.random() * 0.015 + 0.008;
+      this.rotation = Math.random() * Math.PI * 2;
+      this.rotSpeed = (Math.random() - 0.5) * 0.25;
+      this.shape = Math.random() > 0.4 ? 'rect' : 'circle';
+    }
+    update() {
+      this.x += this.vx;
+      this.vy += 0.5;
+      this.y += this.vy;
+      this.vx *= 0.98;
+      this.life -= this.decay;
+      this.rotation += this.rotSpeed;
+    }
+    draw(c) {
+      c.save();
+      c.globalAlpha = Math.max(0, this.life);
+      c.fillStyle = this.color;
+      c.translate(this.x, this.y);
+      c.rotate(this.rotation);
+      if (this.shape === 'rect') {
+        c.fillRect(-this.w / 2, -this.h / 2, this.w, this.h);
+      } else {
+        c.beginPath();
+        c.ellipse(0, 0, this.w / 2, this.h / 2, 0, 0, Math.PI * 2);
+        c.fill();
+      }
+      c.restore();
+    }
   }
 
-  function addToCart(name) { showToast(`${name} added to cart!`); }
+  function launchConfetti(x, y) {
+    for (let i = 0; i < 120; i++) particles.push(new Particle(x, y));
+    if (!confettiAnim) animateConfetti();
+  }
+
+  function animateConfetti() {
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    particles = particles.filter(p => p.life > 0);
+    particles.forEach(p => { p.update(); p.draw(ctx); });
+    if (particles.length > 0) {
+      confettiAnim = requestAnimationFrame(animateConfetti);
+    } else {
+      confettiAnim = null;
+    }
+  }
+
+  /* ─── CART BANNER ─── */
+  let bannerTimer;
+  function showBanner(name) {
+    const b = document.getElementById('cart-banner');
+    document.getElementById('cart-banner-text').textContent = `${name} added to cart!`;
+    b.classList.add('show');
+    clearTimeout(bannerTimer);
+    bannerTimer = setTimeout(() => b.classList.remove('show'), 2200);
+  }
+
+  /* ─── ADD TO CART ─── */
+  let cartCount = 0;
+  function addToCart(name, e) {
+    cartCount++;
+    const badge = document.getElementById('cart-count');
+    badge.textContent = cartCount;
+    badge.style.display = 'inline';
+    const rect = e.currentTarget.getBoundingClientRect();
+    launchConfetti(rect.left + rect.width / 2, rect.top + rect.height / 2);
+    showBanner(name);
+  }
+
+  /* ─── ORDER PAGE ─── */
+  const ORDER_PRODUCTS = {
+    oat:     { name: 'Oat Fuel',     price: 12 },
+    brownie: { name: 'Brownie Fuel', price: 10 },
+    banana:  { name: 'Banana Fuel',  price: 10 },
+  };
+  const orderQtys = { oat: 0, brownie: 0, banana: 0 };
+
+  function openOrderPage() {
+    document.getElementById('order-page').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeOrderPage() {
+    document.getElementById('order-page').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeOrderPage();
+  });
+
+  function changeQty(key, delta) {
+    orderQtys[key] = Math.max(0, orderQtys[key] + delta);
+    document.getElementById('qty-' + key).textContent = orderQtys[key];
+    document.getElementById('op-' + key).classList.toggle('selected', orderQtys[key] > 0);
+    updateSummary();
+  }
+
+  function updateSummary() {
+    const lines = document.getElementById('summary-lines');
+    const empty = document.getElementById('summary-empty');
+    const totalEl = document.getElementById('summary-total');
+    const btn = document.getElementById('btn-place-order');
+    let total = 0;
+    let html = '';
+    for (const [key, p] of Object.entries(ORDER_PRODUCTS)) {
+      const q = orderQtys[key];
+      if (q > 0) {
+        const sub = q * p.price;
+        total += sub;
+        html += `<div class="summary-line"><span class="s-name">${p.name} × ${q}</span><span class="s-price">€${sub}</span></div>`;
+      }
+    }
+    if (html) {
+      empty && (empty.style.display = 'none');
+      lines.innerHTML = html;
+    } else {
+      lines.innerHTML = '<p class="summary-empty" id="summary-empty">No items selected yet.</p>';
+    }
+    totalEl.textContent = '€' + total;
+    btn.disabled = total === 0;
+  }
+
+  function submitOrder(e) {
+    e.preventDefault();
+    document.getElementById('order-form-body').style.display = 'none';
+    const success = document.getElementById('order-success');
+    success.classList.add('visible');
+    // Reset after close
+    setTimeout(() => {
+      Object.keys(orderQtys).forEach(k => {
+        orderQtys[k] = 0;
+        document.getElementById('qty-' + k).textContent = '0';
+        document.getElementById('op-' + k).classList.remove('selected');
+      });
+      updateSummary();
+      e.target.reset();
+      document.getElementById('order-form-body').style.display = '';
+      success.classList.remove('visible');
+      closeOrderPage();
+    }, 3000);
+  }
 
   function handleSubscribe(e) {
     e.preventDefault();
