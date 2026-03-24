@@ -1125,12 +1125,54 @@
     btn.disabled = total === 0;
   }
 
-  function submitOrder(e) {
+  async function submitOrder(e) {
     e.preventDefault();
+
+    const name    = document.getElementById('of-name').value;
+    const email   = document.getElementById('of-email').value;
+    const phone   = document.getElementById('of-phone').value;
+    const city    = document.getElementById('of-city').value;
+    const address = document.getElementById('of-address').value;
+    const note    = document.getElementById('of-note').value;
+
+    const productNames = { oat: 'Oat Fuel', brownie: 'Brownie Fuel', banana: 'Banana Fuel' };
+    const productPrices = { oat: 12, brownie: 10, banana: 10 };
+    const itemLines = Object.entries(orderQtys)
+      .filter(([, qty]) => qty > 0)
+      .map(([k, qty]) => `${productNames[k]} x${qty} = €${qty * productPrices[k]}`)
+      .join('\n');
+    const total = Object.entries(orderQtys)
+      .reduce((sum, [k, qty]) => sum + qty * productPrices[k], 0);
+
+    const message = [
+      `Name: ${name}`,
+      `Email: ${email}`,
+      `Phone: ${phone}`,
+      `City: ${city}`,
+      `Address: ${address}`,
+      note ? `Note: ${note}` : '',
+      '',
+      'Items:',
+      itemLines,
+      '',
+      `Total: €${total}`,
+    ].filter(l => l !== undefined).join('\n');
+
+    try {
+      await fetch('https://formsubmit.co/ajax/ivana@navai.io', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          _subject: `New Proteinara Order from ${name}`,
+          _replyto: email,
+          message,
+        }),
+      });
+    } catch (_) { /* fail silently — still show success */ }
+
     document.getElementById('order-form-body').style.display = 'none';
     const success = document.getElementById('order-success');
     success.classList.add('visible');
-    // Reset after close
     setTimeout(() => {
       Object.keys(orderQtys).forEach(k => {
         orderQtys[k] = 0;
