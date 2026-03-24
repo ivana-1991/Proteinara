@@ -1158,16 +1158,44 @@
       `Total: €${total}`,
     ].filter(l => l !== undefined).join('\n');
 
+    const customerMessage = [
+      `Hi ${name},`,
+      '',
+      'Thank you for your order! We\'ve received it and will confirm delivery details shortly.',
+      '',
+      'Your order:',
+      itemLines,
+      '',
+      `Total: €${total}`,
+      '',
+      'Delivery to:',
+      `${address}, ${city}`,
+      note ? `Note: ${note}` : '',
+      '',
+      '— The Proteinara Team',
+    ].filter(l => l !== undefined).join('\n');
+
     try {
-      await fetch('https://formsubmit.co/ajax/ivana@navai.io', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-        body: JSON.stringify({
-          _subject: `New Proteinara Order from ${name}`,
-          _replyto: email,
-          message,
+      await Promise.all([
+        fetch('https://formsubmit.co/ajax/ivana@navai.io', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            _subject: `New Proteinara Order from ${name}`,
+            _replyto: email,
+            message,
+          }),
         }),
-      });
+        fetch(`https://formsubmit.co/ajax/${email}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({
+            _subject: 'Your Proteinara order is confirmed!',
+            _replyto: 'ivana@navai.io',
+            message: customerMessage,
+          }),
+        }),
+      ]);
     } catch (_) { /* fail silently — still show success */ }
 
     document.getElementById('order-form-body').style.display = 'none';
