@@ -93,12 +93,23 @@
       white-space: nowrap;
     }
     /* "Try now" badge — gold circle with baker character */
+    @keyframes badge-pop-in {
+      0%   { opacity: 0; transform: scale(0.4) rotate(-20deg); }
+      60%  { opacity: 1; transform: scale(1.12) rotate(6deg); }
+      80%  { transform: scale(0.95) rotate(-3deg); }
+      100% { opacity: 1; transform: scale(1) rotate(0deg); }
+    }
     .hero-badge {
       position: fixed; left: 100px; top: 680px; z-index: 200;
       width: 180px; height: 180px;
       background: none; border: none; padding: 0;
       cursor: grab; user-select: none;
       transition: transform 0.2s, box-shadow 0.2s;
+      opacity: 0; pointer-events: none;
+    }
+    .hero-badge.badge-visible {
+      animation: badge-pop-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+      pointer-events: auto;
     }
     .hero-badge:hover { transform: rotate(-5deg); }
     .hero-badge.dragging { cursor: grabbing; transform: rotate(-8deg) scale(1.06); transition: none; }
@@ -1051,6 +1062,18 @@
       dragging = false;
       badge.classList.remove('dragging');
     });
+  })();
+
+  /* badge appears on first scroll */
+  (function() {
+    const badge = document.querySelector('.hero-badge');
+    function showBadge() {
+      if (window.scrollY > 10) {
+        badge.classList.add('badge-visible');
+        window.removeEventListener('scroll', showBadge);
+      }
+    }
+    window.addEventListener('scroll', showBadge, { passive: true });
   })();
 
   /* sticky nav */
