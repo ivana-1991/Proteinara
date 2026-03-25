@@ -626,6 +626,11 @@
       background: var(--brown); color: var(--cream);
       padding: 14px 40px; border-radius: 4px; margin-top: 10px;
     }
+    .mobile-menu-close {
+      position: absolute; top: 24px; right: 24px;
+      background: none; border: none; cursor: pointer;
+      font-size: 24px; color: var(--brown); line-height: 1;
+    }
 
     @media (max-width: 640px) {
       .nav-links { display: none; }
@@ -729,6 +734,7 @@
 </nav>
 
 <div class="mobile-menu" id="mobile-menu">
+  <button class="mobile-menu-close" onclick="closeMobileMenu()" aria-label="Close menu">✕</button>
   <a href="#about" onclick="closeMobileMenu()">Our Story</a>
   <a href="#shop" onclick="closeMobileMenu()">Shop</a>
   <a href="#process" onclick="closeMobileMenu()">Process</a>
