@@ -101,29 +101,38 @@
     }
     .hero-badge {
       position: fixed; left: 32px; bottom: 160px; z-index: 200;
-      display: flex; align-items: center; gap: 10px;
-      background: #fb9d00; border: none;
-      border-radius: 50px; padding: 10px 22px 10px 10px;
+      width: 160px; height: 160px;
+      background: none; border: none; padding: 0;
       cursor: grab; user-select: none;
-      box-shadow: 0 4px 20px rgba(251,157,0,0.45);
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s;
       opacity: 0; pointer-events: none;
-      white-space: nowrap;
     }
     .hero-badge.badge-visible {
       animation: badge-pop-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
       pointer-events: auto;
     }
-    .hero-badge:hover { transform: scale(1.05); box-shadow: 0 6px 24px rgba(251,157,0,0.55); }
-    .hero-badge.dragging { cursor: grabbing; transform: scale(1.06); transition: none; }
-    .hero-badge-char-img {
-      width: 44px; height: 44px; object-fit: contain;
-      border-radius: 50%; background: rgba(0,0,0,0.08); padding: 2px;
+    .hero-badge:hover { transform: rotate(-5deg) scale(1.05); }
+    .hero-badge.dragging { cursor: grabbing; transform: rotate(-8deg) scale(1.06); transition: none; }
+    .hero-badge-circle {
+      position: absolute; inset: 0;
+      background: #fb9d00; border-radius: 50%;
+      box-shadow: 0 4px 20px rgba(251,157,0,0.5);
+      overflow: hidden;
+    }
+    .hero-badge-char {
+      position: absolute;
+      left: -5%; top: 18%;
+      width: 110%; height: 78%;
+      overflow: hidden;
+    }
+    .hero-badge-char img {
+      width: 100%; height: 100%;
+      object-fit: contain;
       mix-blend-mode: multiply;
     }
-    .hero-badge-text {
-      font-family: 'Playfair Display', serif; font-weight: 700;
-      font-size: 15px; color: #1a0a00; letter-spacing: 0.3px;
+    .hero-badge-label {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%; pointer-events: none;
     }
 
     /* ─── MARQUEE ─── */
@@ -691,8 +700,21 @@
     <h1>No hype.<br>Eat real bread.</h1>
   </div>
   <button class="hero-badge" aria-label="Catch the Bread game">
-    <img class="hero-badge-char-img" src="https://www.figma.com/api/mcp/asset/5a3a9318-35d9-483a-ba8e-f5734d986f07" alt="" />
-    <span class="hero-badge-text">Catch the Bread</span>
+    <!-- Orange circle -->
+    <div class="hero-badge-circle"></div>
+    <!-- Baker holding bread -->
+    <div class="hero-badge-char">
+      <img src="https://www.figma.com/api/mcp/asset/bcd703ed-f65f-4ddf-894e-184a00b56e50" alt="" />
+    </div>
+    <!-- Curved "Catch the Bread" text -->
+    <svg class="hero-badge-label" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <path id="topArc" d="M 22,90 A 68,68 0 0,1 158,90" />
+      </defs>
+      <text font-family="'Playfair Display', serif" font-weight="700" font-size="16" fill="#1a0a00" letter-spacing="0.5">
+        <textPath href="#topArc" startOffset="50%" text-anchor="middle">Catch the Bread</textPath>
+      </text>
+    </svg>
   </button>
 </section>
 
