@@ -596,8 +596,40 @@
       .section-gallery { grid-template-columns: 1fr; grid-template-rows: auto; }
       .gal-tall { grid-row: auto; height: 360px; }
     }
+    /* ─── HAMBURGER ─── */
+    .hamburger {
+      display: none; flex-direction: column; justify-content: center; gap: 5px;
+      width: 40px; height: 40px; background: none; border: none; cursor: pointer;
+      padding: 4px; z-index: 201;
+    }
+    .hamburger span {
+      display: block; height: 2px; background: var(--brown); border-radius: 2px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    .mobile-menu {
+      display: none; position: fixed; inset: 0; background: var(--peach);
+      z-index: 200; flex-direction: column; align-items: center; justify-content: center;
+      gap: 40px;
+    }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a, .mobile-menu button.btn-order {
+      font-family: 'Montserrat', sans-serif; font-weight: 500; font-size: 20px;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--brown); text-decoration: none; background: none; border: none;
+      cursor: pointer;
+    }
+    .mobile-menu .btn-order {
+      background: var(--brown); color: var(--cream);
+      padding: 14px 40px; border-radius: 4px; margin-top: 10px;
+    }
+
     @media (max-width: 640px) {
-      .nav-links > a { display: none; }
+      .nav-links { display: none; }
+      .hamburger { display: flex; }
     }
 
     /* GAME MODAL */
@@ -691,7 +723,18 @@
     <a href="#contact">Contact</a>
     <button class="btn-order" onclick="openOrderPage()">Order Now <span id="cart-count" style="display:none;background:#fff;color:var(--brown);border-radius:50%;padding:1px 7px;font-size:11px;font-weight:700;margin-left:4px;">0</span></button>
   </div>
+  <button class="hamburger" id="hamburger" aria-label="Menu" onclick="toggleMobileMenu()">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<div class="mobile-menu" id="mobile-menu">
+  <a href="#about" onclick="closeMobileMenu()">Our Story</a>
+  <a href="#shop" onclick="closeMobileMenu()">Shop</a>
+  <a href="#process" onclick="closeMobileMenu()">Process</a>
+  <a href="#contact" onclick="closeMobileMenu()">Contact</a>
+  <button class="btn-order" onclick="closeMobileMenu();openOrderPage()">Order Now <span id="cart-count-mobile" style="display:none;background:#fff;color:var(--brown);border-radius:50%;padding:1px 7px;font-size:11px;font-weight:700;margin-left:4px;">0</span></button>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -1107,6 +1150,20 @@
     }
     window.addEventListener('scroll', showBadge, { passive: true });
   })();
+
+  /* mobile menu */
+  function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const btn = document.getElementById('hamburger');
+    menu.classList.toggle('open');
+    btn.classList.toggle('open');
+    document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+  }
+  function closeMobileMenu() {
+    document.getElementById('mobile-menu').classList.remove('open');
+    document.getElementById('hamburger').classList.remove('open');
+    document.body.style.overflow = '';
+  }
 
   /* sticky nav */
   const navEl = document.getElementById('nav');
