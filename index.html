@@ -504,6 +504,11 @@
     }
     .summary-line .s-name { font-weight: 500; }
     .summary-line .s-price { font-weight: 700; }
+    .summary-discount-line {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 14px; color: var(--brown); margin-top: 8px;
+      background: #fff8ec; border-radius: 6px; padding: 6px 10px;
+    }
     .summary-empty {
       font-size: 13px; color: rgba(104,32,11,0.4); text-align: center;
       padding: 20px 0;
@@ -649,6 +654,18 @@
       font-family: 'Playfair Display', serif; font-size: 36px; color: #1a0a00; margin: 0;
     }
     .game-over-msg p { font-family: 'Montserrat', sans-serif; font-size: 16px; color: #3a1f14; margin: 0; }
+    .game-discount-badge {
+      background: #fb9d00; color: #1a0a00; border-radius: 12px;
+      padding: 12px 24px; font-family: 'Playfair Display', serif;
+      font-size: 22px; font-weight: 700; text-align: center;
+    }
+    .game-order-btn {
+      background: #68200b; color: #fffdf6; border: none; border-radius: 4px;
+      padding: 12px 24px; font-family: 'Montserrat', sans-serif;
+      font-size: 13px; font-weight: 500; letter-spacing: 0.5px;
+      cursor: pointer;
+    }
+    .game-order-btn:hover { background: #4e1708; }
   </style>
 </head>
 <body>
@@ -861,7 +878,9 @@
     <div class="game-over-msg" id="game-over-msg" style="display:none">
       <h3>Game Over!</h3>
       <p>You caught <strong id="final-score">0</strong> loaves</p>
+      <div class="game-discount-badge" id="game-discount-badge"></div>
       <button class="game-play-btn" onclick="startGame()">Play Again</button>
+      <button class="game-order-btn" onclick="closeGameModal();openOrderPage()">Order Now & Use Discount →</button>
     </div>
   </div>
 </div>
@@ -978,6 +997,10 @@
             <p class="summary-empty" id="summary-empty">No items selected yet.</p>
           </div>
           <hr class="summary-divider" />
+          <div class="summary-discount-line" id="summary-discount-line" style="display:none">
+            <span id="summary-discount-label">Game discount</span>
+            <span class="s-price" id="summary-discount-amount" style="color:#fb9d00;font-weight:700;"></span>
+          </div>
           <div class="summary-total">
             <span>Total</span>
             <span class="summary-total-price" id="summary-total">€0</span>
@@ -1215,7 +1238,18 @@
     } else {
       lines.innerHTML = '<p class="summary-empty" id="summary-empty">No items selected yet.</p>';
     }
-    totalEl.textContent = '€' + total;
+    const discountLine = document.getElementById('summary-discount-line');
+    if (gameDiscount > 0 && total > 0) {
+      const saving = Math.round(total * gameDiscount / 100 * 100) / 100;
+      const finalTotal = Math.round((total - saving) * 100) / 100;
+      document.getElementById('summary-discount-label').textContent = `Game discount (${gameDiscount}%)`;
+      document.getElementById('summary-discount-amount').textContent = `-€${saving}`;
+      discountLine.style.display = 'flex';
+      totalEl.textContent = '€' + finalTotal;
+    } else {
+      discountLine.style.display = 'none';
+      totalEl.textContent = '€' + total;
+    }
     btn.disabled = total === 0;
   }
 
@@ -1239,6 +1273,10 @@
       .map(([k, qty]) => `  ${productNames[k]} x${qty} = €${qty * productPrices[k]}`)
       .join('\n');
 
+    const discountedTotal = gameDiscount > 0
+      ? Math.round((total - total * gameDiscount / 100) * 100) / 100
+      : total;
+
     const ownerMessage = [
       `NEW ORDER — Proteinara`,
       `─────────────────────`,
@@ -1251,7 +1289,9 @@
       `Items:`,
       itemLines,
       ``,
-      `Total: €${total}`,
+      gameDiscount > 0 ? `Subtotal: €${total}` : '',
+      gameDiscount > 0 ? `Discount: ${gameDiscount}% (Catch the Bread game)` : '',
+      `Total: €${discountedTotal}`,
     ].filter(l => l !== undefined).join('\n');
 
     const customerMessage = [
@@ -1262,7 +1302,9 @@
       `Your order:`,
       itemLines,
       ``,
-      `Total: €${total}`,
+      gameDiscount > 0 ? `Subtotal: €${total}` : '',
+      gameDiscount > 0 ? `Game discount: -${gameDiscount}%` : '',
+      `Total: €${discountedTotal}`,
       ``,
       `Delivery to: ${address}, ${city}`,
       note ? `Note: ${note}` : '',
@@ -1340,6 +1382,7 @@
 <script>
   // ── CATCH THE BREAD GAME ──────────────────────────────────────────────
   let gameRaf, gameRunning = false;
+  let gameDiscount = 0; // % discount earned from game
 
   function openGameModal() {
     document.getElementById('game-modal').classList.add('open');
@@ -1471,6 +1514,14 @@
             gameRunning = false;
             document.addEventListener('keydown', onKey);
             document.getElementById('final-score').textContent = score;
+            const discount = Math.min(score, 30); // cap at 30%
+            gameDiscount = discount;
+            const badge = document.getElementById('game-discount-badge');
+            badge.textContent = discount > 0
+              ? `🎉 You earned ${discount}% off your order!`
+              : 'Better luck next time!';
+            badge.style.display = discount > 0 ? '' : 'none';
+            updateSummary();
             document.getElementById('game-over-msg').style.display = 'flex';
             return;
           }
