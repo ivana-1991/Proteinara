@@ -631,13 +631,24 @@
     }
     .game-play-btn:hover { background: #4e1708; }
     .game-intro-baker { width: 195px; height: auto; display: block; margin: 0 auto 32px; mix-blend-mode: multiply; }
-    .game-screen { padding: 16px; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; }
+    .game-screen { padding: 12px; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; gap: 8px; }
     #game-canvas { display: block; border-radius: 8px; flex: 1; min-height: 0; }
     .game-hud {
-      display: flex; justify-content: space-between;
+      display: flex; align-items: center; gap: 8px;
       font-family: 'Montserrat', sans-serif; font-size: 15px;
-      color: #3a1f14; padding: 8px 4px 10px;
+      color: #3a1f14;
     }
+    .game-hud-pill {
+      background: rgba(104,32,11,0.12); border-radius: 20px;
+      padding: 6px 16px; font-weight: 600; font-size: 15px;
+      color: #68200b; flex: 1; text-align: center;
+    }
+    .game-close-hud {
+      position: static; background: rgba(104,32,11,0.12);
+      border-radius: 20px; padding: 6px 14px;
+      font-size: 15px; color: #68200b; font-weight: 600;
+    }
+    .game-close-hud:hover { background: rgba(104,32,11,0.22); }
     .game-over-msg {
       position: absolute; inset: 0; background: rgba(248,216,198,0.93);
       border-radius: 16px; display: flex; flex-direction: column;
@@ -863,10 +874,10 @@
   </div>
   <!-- GAME SCREEN -->
   <div class="game-screen" id="game-screen" style="display:none">
-    <button class="game-close" onclick="closeGameModal()" aria-label="Close">&#x2715;</button>
     <div class="game-hud">
-      <span>Score: <strong id="game-score">0</strong></span>
-      <span>Lives: <strong id="game-lives">3</strong></span>
+      <span class="game-hud-pill">🍞 <strong id="game-score">0</strong></span>
+      <span class="game-hud-pill">❤️ <strong id="game-lives">3</strong></span>
+      <button class="game-close game-close-hud" onclick="closeGameModal()" aria-label="Close">&#x2715;</button>
     </div>
     <canvas id="game-canvas"></canvas>
     <div class="game-over-msg" id="game-over-msg" style="display:none">
@@ -1382,7 +1393,7 @@
     // Baker (tray holder) — uses the Figma asset
     const bakerImg = new Image();
     bakerImg.src = 'https://www.figma.com/api/mcp/asset/bcd703ed-f65f-4ddf-894e-184a00b56e50';
-    const BAKER_W = Math.round(W * 0.38), BAKER_H = Math.round(BAKER_W * 1.02);
+    const BAKER_W = Math.round(W * 0.52), BAKER_H = Math.round(BAKER_W * 1.02);
     const TRAY_Y_OFFSET = Math.round(BAKER_H * 0.08); // top of raised hands
 
     // Food item images from Figma
