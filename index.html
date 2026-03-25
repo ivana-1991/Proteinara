@@ -1460,7 +1460,7 @@
     const BAKER_SPEED = 6;
     const keys = {};
 
-    let score = 0, lives = 3;
+    let score = 0, lives = 1;
     let items = [], lastSpawn = 0, spawnInterval = 1600;
 
     // Mouse / touch: move baker to cursor position
@@ -1499,7 +1499,7 @@
 
     stopGame();
     gameRunning = true;
-    score = 0; lives = 3; items = [];
+    score = 0; lives = 1; items = [];
     bakerX = W / 2; bakerY = H - BAKER_H + 10;
     updateHUD();
 
