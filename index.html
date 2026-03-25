@@ -1376,6 +1376,8 @@
   function stopGame() {
     gameRunning = false;
     cancelAnimationFrame(gameRaf);
+    document.removeEventListener('keydown', arguments.callee);
+    document.removeEventListener('keyup', arguments.callee);
   }
 
   function startGame() {
@@ -1385,43 +1387,58 @@
     document.getElementById('game-over-msg').style.display = 'none';
 
     const canvas = document.getElementById('game-canvas');
+    const dpr = window.devicePixelRatio || 1;
     const W = Math.min(460, window.innerWidth - 40);
     const H = Math.min(Math.round(W * 1.36), window.innerHeight * 0.75);
-    canvas.width = W; canvas.height = H;
+    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+    canvas.width = W * dpr; canvas.height = H * dpr;
     const ctx = canvas.getContext('2d');
+    ctx.scale(dpr, dpr);
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
 
-    // Baker (tray holder) — uses the Figma asset
+    // Baker (tray holder)
     const bakerImg = new Image();
     bakerImg.src = 'https://www.figma.com/api/mcp/asset/bcd703ed-f65f-4ddf-894e-184a00b56e50';
-    const BAKER_W = Math.round(W * 0.52), BAKER_H = Math.round(BAKER_W * 1.02);
-    const TRAY_Y_OFFSET = Math.round(BAKER_H * 0.08); // top of raised hands
+    const BAKER_W = Math.round(W * 0.46), BAKER_H = Math.round(BAKER_W * 1.02);
+    const TRAY_Y_OFFSET = Math.round(BAKER_H * 0.08);
 
-    // Food item images from Figma
+    // Food item images
     const FOOD_IMGS = [
-      'https://www.figma.com/api/mcp/asset/ae915d95-1559-45d0-9b50-7f23b12b57db', // baguette
-      'https://www.figma.com/api/mcp/asset/085f9999-81fc-4e0b-bd0e-140a7793a9f5', // loaf
-      'https://www.figma.com/api/mcp/asset/c8cdd87b-c77b-47b5-a06a-976add0238a6', // croissant
-      'https://www.figma.com/api/mcp/asset/b0671bcf-60f2-46e2-8c95-853cbc4fb250', // cupcake
-      'https://www.figma.com/api/mcp/asset/a2fe9735-9294-46b6-ac01-ba5f484b7ab4', // bread
+      'https://www.figma.com/api/mcp/asset/ae915d95-1559-45d0-9b50-7f23b12b57db',
+      'https://www.figma.com/api/mcp/asset/085f9999-81fc-4e0b-bd0e-140a7793a9f5',
+      'https://www.figma.com/api/mcp/asset/c8cdd87b-c77b-47b5-a06a-976add0238a6',
+      'https://www.figma.com/api/mcp/asset/b0671bcf-60f2-46e2-8c95-853cbc4fb250',
+      'https://www.figma.com/api/mcp/asset/a2fe9735-9294-46b6-ac01-ba5f484b7ab4',
     ];
     const foodImgs = FOOD_IMGS.map(src => { const i = new Image(); i.src = src; return i; });
     const ITEM_SIZE = Math.round(W * 0.13);
 
     let bakerX = W / 2;
-    let score = 0, lives = 3;
-    let items = [];
-    let lastSpawn = 0;
-    let spawnInterval = 1600;
+    let bakerY = H - BAKER_H + 10;
+    const BAKER_SPEED = 6;
+    const keys = {};
 
+    let score = 0, lives = 3;
+    let items = [], lastSpawn = 0, spawnInterval = 1600;
+
+    // Mouse / touch: move baker to cursor position
     canvas.onmousemove = e => {
       const rect = canvas.getBoundingClientRect();
       bakerX = Math.max(BAKER_W / 2, Math.min(W - BAKER_W / 2, e.clientX - rect.left));
+      bakerY = Math.max(BAKER_H / 2, Math.min(H - BAKER_H / 2, e.clientY - rect.top));
     };
     canvas.ontouchmove = e => {
       e.preventDefault();
       const rect = canvas.getBoundingClientRect();
       bakerX = Math.max(BAKER_W / 2, Math.min(W - BAKER_W / 2, e.touches[0].clientX - rect.left));
+      bakerY = Math.max(BAKER_H / 2, Math.min(H - BAKER_H / 2, e.touches[0].clientY - rect.top));
     };
+
+    // Arrow / WASD keyboard support
+    const onKey = e => { keys[e.key] = e.type === 'keydown'; };
+    document.addEventListener('keydown', onKey);
+    document.addEventListener('keyup', onKey);
 
     function spawnItem(now) {
       items.push({
@@ -1442,41 +1459,38 @@
     stopGame();
     gameRunning = true;
     score = 0; lives = 3; items = [];
+    bakerX = W / 2; bakerY = H - BAKER_H + 10;
     updateHUD();
 
     function loop(now) {
       if (!gameRunning) return;
-      ctx.clearRect(0, 0, W, H);
 
-      // Spawn
+      // Keyboard movement
+      if (keys['ArrowLeft']  || keys['a'] || keys['A']) bakerX = Math.max(BAKER_W / 2, bakerX - BAKER_SPEED);
+      if (keys['ArrowRight'] || keys['d'] || keys['D']) bakerX = Math.min(W - BAKER_W / 2, bakerX + BAKER_SPEED);
+      if (keys['ArrowUp']    || keys['w'] || keys['W']) bakerY = Math.max(BAKER_H / 2, bakerY - BAKER_SPEED);
+      if (keys['ArrowDown']  || keys['s'] || keys['S']) bakerY = Math.min(H - BAKER_H / 2 + 10, bakerY + BAKER_SPEED);
+
+      ctx.clearRect(0, 0, W, H);
       if (now - lastSpawn > spawnInterval) spawnItem(now);
 
-      // Baker Y position
-      const bakerY = H - BAKER_H + 10;
-      const trayY = bakerY + TRAY_Y_OFFSET;
-      const trayLeft = bakerX - BAKER_W * 0.44;
+      const trayY = bakerY - BAKER_H / 2 + TRAY_Y_OFFSET;
+      const trayLeft  = bakerX - BAKER_W * 0.44;
       const trayRight = bakerX + BAKER_W * 0.44;
 
-      // Items
       for (let i = items.length - 1; i >= 0; i--) {
         const it = items[i];
         it.y += it.speed;
 
-        // Caught?
-        if (it.y + ITEM_SIZE / 2 >= trayY && it.y < trayY + 20 &&
+        if (it.y + ITEM_SIZE / 2 >= trayY && it.y < trayY + 28 &&
             it.x >= trayLeft && it.x <= trayRight) {
-          items.splice(i, 1);
-          score++;
-          updateHUD();
-          continue;
+          items.splice(i, 1); score++; updateHUD(); continue;
         }
-        // Missed
         if (it.y > H) {
-          items.splice(i, 1);
-          lives--;
-          updateHUD();
+          items.splice(i, 1); lives--; updateHUD();
           if (lives <= 0) {
             gameRunning = false;
+            document.addEventListener('keydown', onKey);
             document.getElementById('final-score').textContent = score;
             document.getElementById('game-over-msg').style.display = 'flex';
             return;
@@ -1486,9 +1500,7 @@
         ctx.drawImage(it.img, it.x - ITEM_SIZE / 2, it.y - ITEM_SIZE / 2, ITEM_SIZE, ITEM_SIZE);
       }
 
-      // Baker
-      ctx.drawImage(bakerImg, bakerX - BAKER_W / 2, bakerY, BAKER_W, BAKER_H);
-
+      ctx.drawImage(bakerImg, bakerX - BAKER_W / 2, bakerY - BAKER_H / 2, BAKER_W, BAKER_H);
       gameRaf = requestAnimationFrame(loop);
     }
 
