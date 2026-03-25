@@ -96,7 +96,7 @@
     .hero-badge {
       position: fixed; left: 100px; top: 680px; z-index: 200;
       width: 180px; height: 180px;
-      text-decoration: none; display: block;
+      background: none; border: none; padding: 0;
       cursor: grab; user-select: none;
       transition: transform 0.2s, box-shadow 0.2s;
     }
@@ -583,6 +583,59 @@
     @media (max-width: 640px) {
       .nav-links > a { display: none; }
     }
+
+    /* GAME MODAL */
+    .game-modal {
+      display: none; position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.5);
+      align-items: center; justify-content: center;
+    }
+    .game-modal.open { display: flex; }
+    .game-intro, .game-screen {
+      position: relative;
+      background: #f8d8c6; border-radius: 16px;
+      width: 500px; max-width: 95vw;
+      padding: 48px 40px 40px;
+      text-align: center;
+    }
+    .game-close {
+      position: absolute; top: 16px; right: 20px;
+      background: none; border: none; font-size: 20px;
+      cursor: pointer; color: #3a1f14; line-height: 1;
+    }
+    .game-intro-title {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: 50px; color: #1a0a00; margin: 40px 0 16px;
+    }
+    .game-intro-desc {
+      font-family: 'Montserrat', sans-serif; font-size: 16px;
+      color: #1a0a00; line-height: 1.8; margin: 0 0 48px;
+    }
+    .game-play-btn {
+      background: #68200b; color: #fffdf6;
+      border: none; border-radius: 4px;
+      padding: 15px 34px; font-family: 'Montserrat', sans-serif;
+      font-size: 14px; font-weight: 500; letter-spacing: 0.86px;
+      cursor: pointer; text-transform: uppercase;
+    }
+    .game-play-btn:hover { background: #4e1708; }
+    .game-intro-baker { width: 195px; height: auto; display: block; margin: 0 auto 32px; mix-blend-mode: multiply; }
+    .game-screen { padding: 16px; max-height: 92vh; overflow: hidden; display: flex; flex-direction: column; }
+    #game-canvas { display: block; border-radius: 8px; flex: 1; min-height: 0; }
+    .game-hud {
+      display: flex; justify-content: space-between;
+      font-family: 'Montserrat', sans-serif; font-size: 15px;
+      color: #3a1f14; padding: 8px 4px 10px;
+    }
+    .game-over-msg {
+      position: absolute; inset: 0; background: rgba(248,216,198,0.93);
+      border-radius: 16px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 12px;
+    }
+    .game-over-msg h3 {
+      font-family: 'Playfair Display', serif; font-size: 36px; color: #1a0a00; margin: 0;
+    }
+    .game-over-msg p { font-family: 'Montserrat', sans-serif; font-size: 16px; color: #3a1f14; margin: 0; }
   </style>
 </head>
 <body>
@@ -607,7 +660,7 @@
   <div class="hero-text">
     <h1>No hype.<br>Eat real bread.</h1>
   </div>
-  <a class="hero-badge" href="#shop" aria-label="Try now">
+  <button class="hero-badge" aria-label="Catch the Bread game">
     <div class="hero-badge-circle">
       <img src="https://www.figma.com/api/mcp/asset/f07d3bb9-c214-4b01-9c64-07fb0b889590" alt="" />
     </div>
@@ -623,7 +676,7 @@
         <textPath href="#topArc" startOffset="50%" text-anchor="middle">Catch the Bread</textPath>
       </text>
     </svg>
-  </a>
+  </button>
 </section>
 
 <!-- MARQUEE -->
@@ -787,6 +840,32 @@
   </div>
 </section>
 
+<!-- GAME MODAL -->
+<div class="game-modal" id="game-modal" role="dialog" aria-modal="true" aria-label="Catch the Bread game">
+  <!-- INTRO SCREEN -->
+  <div class="game-intro" id="game-intro">
+    <button class="game-close" onclick="closeGameModal()" aria-label="Close">&#x2715;</button>
+    <h2 class="game-intro-title">Catch the Bread</h2>
+    <p class="game-intro-desc">Move your mouse to guide the baker.<br>Catch food on the tray — don't drop them!</p>
+    <img src="https://www.figma.com/api/mcp/asset/8894eacb-81f8-499e-8f77-daecdc50c2c3" alt="Baker character" class="game-intro-baker" />
+    <button class="game-play-btn" onclick="startGame()">PLAY NOW</button>
+  </div>
+  <!-- GAME SCREEN -->
+  <div class="game-screen" id="game-screen" style="display:none">
+    <button class="game-close" onclick="closeGameModal()" aria-label="Close">&#x2715;</button>
+    <div class="game-hud">
+      <span>Score: <strong id="game-score">0</strong></span>
+      <span>Lives: <strong id="game-lives">3</strong></span>
+    </div>
+    <canvas id="game-canvas"></canvas>
+    <div class="game-over-msg" id="game-over-msg" style="display:none">
+      <h3>Game Over!</h3>
+      <p>You caught <strong id="final-score">0</strong> loaves</p>
+      <button class="game-play-btn" onclick="startGame()">Play Again</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <!-- ORDER PAGE OVERLAY -->
 <div class="order-page" id="order-page" aria-modal="true" role="dialog" aria-label="Place your order">
@@ -933,10 +1012,10 @@
   /* draggable badge */
   (function() {
     const badge = document.querySelector('.hero-badge');
-    let dragging = false, ox = 0, oy = 0;
+    let dragging = false, moved = false, ox = 0, oy = 0;
     badge.addEventListener('mousedown', e => {
       e.preventDefault();
-      dragging = true;
+      dragging = true; moved = false;
       badge.classList.add('dragging');
       const r = badge.getBoundingClientRect();
       ox = e.clientX - r.left;
@@ -944,10 +1023,12 @@
     });
     document.addEventListener('mousemove', e => {
       if (!dragging) return;
+      moved = true;
       badge.style.left = (e.clientX - ox) + 'px';
       badge.style.top  = (e.clientY - oy) + 'px';
     });
     document.addEventListener('mouseup', () => {
+      if (dragging && !moved) openGameModal();
       dragging = false;
       badge.classList.remove('dragging');
     });
@@ -1241,6 +1322,149 @@
     showToast(`Thanks! We'll be in touch at ${inp.value}`);
     inp.value = '';
   }
+</script>
+
+<script>
+  // ── CATCH THE BREAD GAME ──────────────────────────────────────────────
+  let gameRaf, gameRunning = false;
+
+  function openGameModal() {
+    document.getElementById('game-modal').classList.add('open');
+    document.getElementById('game-intro').style.display = '';
+    document.getElementById('game-screen').style.display = 'none';
+  }
+
+  function closeGameModal() {
+    document.getElementById('game-modal').classList.remove('open');
+    stopGame();
+  }
+
+  function stopGame() {
+    gameRunning = false;
+    cancelAnimationFrame(gameRaf);
+  }
+
+  function startGame() {
+    document.getElementById('game-intro').style.display = 'none';
+    const screen = document.getElementById('game-screen');
+    screen.style.display = '';
+    document.getElementById('game-over-msg').style.display = 'none';
+
+    const canvas = document.getElementById('game-canvas');
+    const W = Math.min(460, window.innerWidth - 40);
+    const H = Math.min(Math.round(W * 1.36), window.innerHeight * 0.75);
+    canvas.width = W; canvas.height = H;
+    const ctx = canvas.getContext('2d');
+
+    // Baker (tray holder) — uses the Figma asset
+    const bakerImg = new Image();
+    bakerImg.src = 'https://www.figma.com/api/mcp/asset/bcd703ed-f65f-4ddf-894e-184a00b56e50';
+    const BAKER_W = Math.round(W * 0.38), BAKER_H = Math.round(BAKER_W * 1.02);
+    const TRAY_Y_OFFSET = Math.round(BAKER_H * 0.08); // top of raised hands
+
+    // Food item images from Figma
+    const FOOD_IMGS = [
+      'https://www.figma.com/api/mcp/asset/ae915d95-1559-45d0-9b50-7f23b12b57db', // baguette
+      'https://www.figma.com/api/mcp/asset/085f9999-81fc-4e0b-bd0e-140a7793a9f5', // loaf
+      'https://www.figma.com/api/mcp/asset/c8cdd87b-c77b-47b5-a06a-976add0238a6', // croissant
+      'https://www.figma.com/api/mcp/asset/b0671bcf-60f2-46e2-8c95-853cbc4fb250', // cupcake
+      'https://www.figma.com/api/mcp/asset/a2fe9735-9294-46b6-ac01-ba5f484b7ab4', // bread
+    ];
+    const foodImgs = FOOD_IMGS.map(src => { const i = new Image(); i.src = src; return i; });
+    const ITEM_SIZE = Math.round(W * 0.13);
+
+    let bakerX = W / 2;
+    let score = 0, lives = 3;
+    let items = [];
+    let lastSpawn = 0;
+    let spawnInterval = 1600;
+
+    canvas.onmousemove = e => {
+      const rect = canvas.getBoundingClientRect();
+      bakerX = Math.max(BAKER_W / 2, Math.min(W - BAKER_W / 2, e.clientX - rect.left));
+    };
+    canvas.ontouchmove = e => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      bakerX = Math.max(BAKER_W / 2, Math.min(W - BAKER_W / 2, e.touches[0].clientX - rect.left));
+    };
+
+    function spawnItem(now) {
+      items.push({
+        x: ITEM_SIZE + Math.random() * (W - ITEM_SIZE * 2),
+        y: -ITEM_SIZE,
+        img: foodImgs[Math.floor(Math.random() * foodImgs.length)],
+        speed: 2.2 + Math.random() * 1.4 + score * 0.04,
+      });
+      lastSpawn = now;
+      spawnInterval = Math.max(700, 1600 - score * 18);
+    }
+
+    function updateHUD() {
+      document.getElementById('game-score').textContent = score;
+      document.getElementById('game-lives').textContent = lives;
+    }
+
+    stopGame();
+    gameRunning = true;
+    score = 0; lives = 3; items = [];
+    updateHUD();
+
+    function loop(now) {
+      if (!gameRunning) return;
+      ctx.clearRect(0, 0, W, H);
+
+      // Spawn
+      if (now - lastSpawn > spawnInterval) spawnItem(now);
+
+      // Baker Y position
+      const bakerY = H - BAKER_H + 10;
+      const trayY = bakerY + TRAY_Y_OFFSET;
+      const trayLeft = bakerX - BAKER_W * 0.44;
+      const trayRight = bakerX + BAKER_W * 0.44;
+
+      // Items
+      for (let i = items.length - 1; i >= 0; i--) {
+        const it = items[i];
+        it.y += it.speed;
+
+        // Caught?
+        if (it.y + ITEM_SIZE / 2 >= trayY && it.y < trayY + 20 &&
+            it.x >= trayLeft && it.x <= trayRight) {
+          items.splice(i, 1);
+          score++;
+          updateHUD();
+          continue;
+        }
+        // Missed
+        if (it.y > H) {
+          items.splice(i, 1);
+          lives--;
+          updateHUD();
+          if (lives <= 0) {
+            gameRunning = false;
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('game-over-msg').style.display = 'flex';
+            return;
+          }
+          continue;
+        }
+        ctx.drawImage(it.img, it.x - ITEM_SIZE / 2, it.y - ITEM_SIZE / 2, ITEM_SIZE, ITEM_SIZE);
+      }
+
+      // Baker
+      ctx.drawImage(bakerImg, bakerX - BAKER_W / 2, bakerY, BAKER_W, BAKER_H);
+
+      gameRaf = requestAnimationFrame(loop);
+    }
+
+    gameRaf = requestAnimationFrame(loop);
+  }
+
+  // Close on backdrop click
+  document.getElementById('game-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeGameModal();
+  });
 </script>
 </body>
 </html>
