@@ -100,39 +100,30 @@
       100% { opacity: 1; transform: scale(1) rotate(0deg); }
     }
     .hero-badge {
-      position: fixed; left: 100px; top: 680px; z-index: 200;
-      width: 180px; height: 180px;
-      background: none; border: none; padding: 0;
+      position: fixed; left: 32px; bottom: 160px; z-index: 200;
+      display: flex; align-items: center; gap: 10px;
+      background: #fb9d00; border: none;
+      border-radius: 50px; padding: 10px 22px 10px 10px;
       cursor: grab; user-select: none;
+      box-shadow: 0 4px 20px rgba(251,157,0,0.45);
       transition: transform 0.2s, box-shadow 0.2s;
       opacity: 0; pointer-events: none;
+      white-space: nowrap;
     }
     .hero-badge.badge-visible {
       animation: badge-pop-in 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
       pointer-events: auto;
     }
-    .hero-badge:hover { transform: rotate(-5deg); }
-    .hero-badge.dragging { cursor: grabbing; transform: rotate(-8deg) scale(1.06); transition: none; }
-    .hero-badge-circle {
-      position: absolute; inset: 0;
+    .hero-badge:hover { transform: scale(1.05); box-shadow: 0 6px 24px rgba(251,157,0,0.55); }
+    .hero-badge.dragging { cursor: grabbing; transform: scale(1.06); transition: none; }
+    .hero-badge-char-img {
+      width: 44px; height: 44px; object-fit: contain;
+      border-radius: 50%; background: rgba(0,0,0,0.08); padding: 2px;
+      mix-blend-mode: multiply;
     }
-    .hero-badge-circle img {
-      width: 100%; height: 100%; object-fit: contain; display: block;
-    }
-    .hero-badge-char {
-      position: absolute;
-      left: 29%; top: 43%;
-      width: 42%; height: 42%; overflow: hidden;
-    }
-    .hero-badge-label {
-      position: absolute; inset: 0;
-      width: 100%; height: 100%; pointer-events: none;
-    }
-    .hero-badge-char img {
-      position: absolute;
-      width: 212.17%; height: 172.68%;
-      left: -52.13%; top: -16.69%;
-      max-width: none;
+    .hero-badge-text {
+      font-family: 'Playfair Display', serif; font-weight: 700;
+      font-size: 15px; color: #1a0a00; letter-spacing: 0.3px;
     }
 
     /* ─── MARQUEE ─── */
@@ -683,21 +674,8 @@
     <h1>No hype.<br>Eat real bread.</h1>
   </div>
   <button class="hero-badge" aria-label="Catch the Bread game">
-    <div class="hero-badge-circle">
-      <img src="https://www.figma.com/api/mcp/asset/f07d3bb9-c214-4b01-9c64-07fb0b889590" alt="" />
-    </div>
-    <div class="hero-badge-char">
-      <img src="https://www.figma.com/api/mcp/asset/5a3a9318-35d9-483a-ba8e-f5734d986f07" alt="Baker character" />
-    </div>
-    <!-- "Catch the Bread" curved text along top arc of the circle -->
-    <svg class="hero-badge-label" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <path id="topArc" d="M 18,90 A 72,72 0 0,1 162,90" />
-      </defs>
-      <text font-family="'Playfair Display', serif" font-weight="700" font-size="15" fill="#1a0a00" letter-spacing="0.5">
-        <textPath href="#topArc" startOffset="50%" text-anchor="middle">Catch the Bread</textPath>
-      </text>
-    </svg>
+    <img class="hero-badge-char-img" src="https://www.figma.com/api/mcp/asset/5a3a9318-35d9-483a-ba8e-f5734d986f07" alt="" />
+    <span class="hero-badge-text">Catch the Bread</span>
   </button>
 </section>
 
@@ -1075,9 +1053,10 @@
     });
   })();
 
-  /* badge appears on first scroll */
+  /* badge appears on first scroll — always reset to home position */
   (function() {
     const badge = document.querySelector('.hero-badge');
+    badge.style.left = '32px'; badge.style.top = (window.innerHeight - 160) + 'px';
     function showBadge() {
       if (window.scrollY > 10) {
         badge.classList.add('badge-visible');
