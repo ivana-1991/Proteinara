@@ -102,7 +102,9 @@
     .hero-badge {
       position: fixed; left: 32px; bottom: 160px; z-index: 200;
       width: 160px; height: 160px;
-      background: none; border: none; padding: 0;
+      background: #fb9d00; border: none; padding: 0;
+      border-radius: 50%; overflow: hidden;
+      box-shadow: 0 4px 20px rgba(251,157,0,0.5);
       cursor: grab; user-select: none;
       transition: transform 0.2s;
       opacity: 0; pointer-events: none;
@@ -113,21 +115,18 @@
     }
     .hero-badge:hover { transform: rotate(-5deg) scale(1.05); }
     .hero-badge.dragging { cursor: grabbing; transform: rotate(-8deg) scale(1.06); transition: none; }
-    .hero-badge-circle {
-      position: absolute; inset: 0;
-      background: #fb9d00; border-radius: 50%;
-      box-shadow: 0 4px 20px rgba(251,157,0,0.5);
-      overflow: hidden;
-    }
+    /* Figma: container 112×135px at 104.51,111 inside 322px frame → scaled to 160px badge */
     .hero-badge-char {
       position: absolute;
-      left: -5%; top: 18%;
-      width: 110%; height: 78%;
+      left: 27.4%; top: 30%;
+      width: 44.8%; height: 54%;
       overflow: hidden;
     }
     .hero-badge-char img {
-      width: 100%; height: 100%;
-      object-fit: contain;
+      position: absolute;
+      width: 212.17%; height: 172.68%;
+      left: -52.13%; top: -16.69%;
+      max-width: none;
       mix-blend-mode: multiply;
     }
     .hero-badge-label {
@@ -700,18 +699,16 @@
     <h1>No hype.<br>Eat real bread.</h1>
   </div>
   <button class="hero-badge" aria-label="Catch the Bread game">
-    <!-- Orange circle -->
-    <div class="hero-badge-circle"></div>
     <!-- Baker holding bread -->
     <div class="hero-badge-char">
-      <img src="https://www.figma.com/api/mcp/asset/bcd703ed-f65f-4ddf-894e-184a00b56e50" alt="" />
+      <img src="https://www.figma.com/api/mcp/asset/a2db604e-a9ea-4c77-832b-ee096574a7ea" alt="" />
     </div>
     <!-- Curved "Catch the Bread" text -->
-    <svg class="hero-badge-label" viewBox="0 0 180 180" xmlns="http://www.w3.org/2000/svg">
+    <svg class="hero-badge-label" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <path id="topArc" d="M 22,90 A 68,68 0 0,1 158,90" />
+        <path id="topArc" d="M 14,80 A 66,66 0 0,1 146,80" />
       </defs>
-      <text font-family="'Playfair Display', serif" font-weight="700" font-size="16" fill="#1a0a00" letter-spacing="0.5">
+      <text font-family="'Playfair Display', serif" font-weight="700" font-size="15" fill="#1a0a00" letter-spacing="0.5">
         <textPath href="#topArc" startOffset="50%" text-anchor="middle">Catch the Bread</textPath>
       </text>
     </svg>
