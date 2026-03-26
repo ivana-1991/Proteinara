@@ -1481,10 +1481,6 @@
           method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify({ _subject: `New Proteinara Order from ${name}`, _replyto: email, message: ownerMessage }),
         }),
-        fetch(`https://formsubmit.co/ajax/${email}`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ _subject: 'Your Proteinara order is confirmed!', _replyto: 'ivana@navai.io', message: customerMessage }),
-        }),
       ]);
     } catch (_) {}
 
