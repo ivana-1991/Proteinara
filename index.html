@@ -1082,9 +1082,9 @@
           </div>
         </div>
         <button class="btn-place-order" id="btn-place-order" onclick="document.getElementById('order-form').requestSubmit()" disabled>
-          Place Order
+          Pay with Stripe →
         </button>
-        <p class="order-notice">We'll confirm your order via email within a few hours. Fresh delivery to your door.</p>
+        <p class="order-notice">You'll be redirected to Stripe to complete payment securely. We'll also send a confirmation email.</p>
       </div>
     </div>
 
@@ -1446,23 +1446,15 @@
           }),
         }),
       ]);
-    } catch (_) { /* fail silently — still show success */ }
+    } catch (_) { /* fail silently — still redirect to Stripe */ }
 
-    document.getElementById('order-form-body').style.display = 'none';
-    const success = document.getElementById('order-success');
-    success.classList.add('visible');
-    setTimeout(() => {
-      Object.keys(orderQtys).forEach(k => {
-        orderQtys[k] = 0;
-        document.getElementById('qty-' + k).textContent = '0';
-        document.getElementById('op-' + k).classList.remove('selected');
-      });
-      updateSummary();
-      e.target.reset();
-      document.getElementById('order-form-body').style.display = '';
-      success.classList.remove('visible');
-      closeOrderPage();
-    }, 3000);
+    // Build Stripe Payment Link with prefilled info
+    const stripeBase = 'https://buy.stripe.com/test_14A14m6cvgmvfVgcsmao800';
+    const stripeParams = new URLSearchParams({
+      prefilled_email: email,
+      prefilled_name: name,
+    });
+    window.location.href = `${stripeBase}?${stripeParams.toString()}`;
   }
 
   function handleSubscribe(e) {
