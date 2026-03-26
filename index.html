@@ -1446,15 +1446,46 @@
           }),
         }),
       ]);
-    } catch (_) { /* fail silently — still redirect to Stripe */ }
+    } catch (_) { /* fail silently */ }
 
-    // Build Stripe Payment Link with prefilled info
-    const stripeBase = 'https://buy.stripe.com/test_14A14m6cvgmvfVgcsmao800';
-    const stripeParams = new URLSearchParams({
-      prefilled_email: email,
-      prefilled_name: name,
-    });
-    window.location.href = `${stripeBase}?${stripeParams.toString()}`;
+    // Create Stripe Checkout Session via serverless function
+    const btn = document.getElementById('btn-place-order');
+    btn.textContent = 'Redirecting to payment…';
+    btn.disabled = true;
+
+    try {
+      const cartItems = Object.entries(orderQtys)
+        .filter(([, qty]) => qty > 0)
+        .map(([k, qty]) => ({
+          name: productNames[k],
+          price: productPrices[k],
+          quantity: qty,
+        }));
+
+      const res = await fetch('/.netlify/functions/create-checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          items: cartItems,
+          discount: gameDiscount,
+          email,
+          name,
+          successUrl: window.location.origin + '/?order=success',
+          cancelUrl: window.location.origin + '/?order=cancel',
+        }),
+      });
+
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error(data.error || 'Unknown error');
+      }
+    } catch (err) {
+      btn.textContent = 'Pay with Stripe →';
+      btn.disabled = false;
+      alert('Payment error: ' + err.message + '\nPlease try again.');
+    }
   }
 
   function handleSubscribe(e) {
@@ -1463,6 +1494,18 @@
     showToast(`Thanks! We'll be in touch at ${inp.value}`);
     inp.value = '';
   }
+
+  // Handle Stripe return
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('order') === 'success') {
+      history.replaceState({}, '', window.location.pathname);
+      setTimeout(() => showToast('🎉 Payment successful! Order confirmed — check your email.'), 300);
+    } else if (params.get('order') === 'cancel') {
+      history.replaceState({}, '', window.location.pathname);
+      setTimeout(() => showToast('Payment cancelled — your cart is still saved.'), 300);
+    }
+  })();
 </script>
 
 <script>
