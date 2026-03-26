@@ -1477,9 +1477,12 @@
             email, phone, city, address, oat_fuel: orderQtys.oat || 0,
             brownie_fuel: orderQtys.brownie || 0, banana_fuel: orderQtys.banana || 0, total: discountedTotal, note: note || '' }),
         }),
-        fetch('https://formsubmit.co/ajax/913bb7f31e9596070dc2e43c00641e79', {
-          method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({ _subject: `New Proteinara Order from ${name}`, _replyto: email, message: ownerMessage }),
+        fetch('/.netlify/functions/send-order-email', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, phone, city, address, note,
+            items: Object.entries(orderQtys).filter(([,qty]) => qty > 0)
+              .map(([k,qty]) => ({ name: {oat:'Oat Fuel',brownie:'Brownie Fuel',banana:'Banana Fuel'}[k], price: {oat:12,brownie:10,banana:10}[k], quantity: qty })),
+            total, discountedTotal, discount: gameDiscount }),
         }),
       ]);
     } catch (_) {}
