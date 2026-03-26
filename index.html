@@ -946,7 +946,8 @@
   <div class="game-screen" id="game-screen" style="display:none">
     <div class="game-hud">
       <span class="game-hud-pill">🍞 <strong id="game-score">0</strong></span>
-      <span class="game-hud-pill">❤️ <strong id="game-lives">3</strong></span>
+      <span class="game-hud-pill">❤️ <strong id="game-lives">1</strong></span>
+      <span class="game-hud-pill game-timer-pill" id="game-timer-pill" style="display:none">⏱ <strong id="game-timer">15</strong>s</span>
       <button class="game-close game-close-hud" onclick="closeGameModal()" aria-label="Close">&#x2715;</button>
     </div>
     <canvas id="game-canvas"></canvas>
@@ -1476,6 +1477,7 @@
   // ── CATCH THE BREAD GAME ──────────────────────────────────────────────
   let gameRaf, gameRunning = false;
   let gameDiscount = 0; // % discount earned from game
+  let gameMobileTimer = null; // mobile countdown interval
 
   function openGameModal() {
     document.getElementById('game-modal').classList.add('open');
@@ -1491,8 +1493,7 @@
   function stopGame() {
     gameRunning = false;
     cancelAnimationFrame(gameRaf);
-    document.removeEventListener('keydown', arguments.callee);
-    document.removeEventListener('keyup', arguments.callee);
+    if (gameMobileTimer) { clearInterval(gameMobileTimer); gameMobileTimer = null; }
   }
 
   function startGame() {
@@ -1537,6 +1538,16 @@
     let score = 0, lives = 1;
     let items = [], lastSpawn = 0, spawnInterval = 1600;
 
+    // Mobile 15-second timer
+    const isMobile = window.innerWidth <= 768 || ('ontouchstart' in window);
+    let mobileTimeLeft = 15;
+    const timerPill = document.getElementById('game-timer-pill');
+    const timerEl = document.getElementById('game-timer');
+    if (isMobile) {
+      timerPill.style.display = '';
+      timerEl.textContent = mobileTimeLeft;
+    }
+
     // Mouse / touch: move baker to cursor position
     canvas.onmousemove = e => {
       const rect = canvas.getBoundingClientRect();
@@ -1571,11 +1582,44 @@
       document.getElementById('game-lives').textContent = lives;
     }
 
+    function triggerGameOver() {
+      gameRunning = false;
+      if (gameMobileTimer) { clearInterval(gameMobileTimer); gameMobileTimer = null; }
+      document.getElementById('final-score').textContent = score;
+      const discount = Math.min(score, 30);
+      gameDiscount = discount;
+      const discBadge = document.getElementById('game-discount-badge');
+      discBadge.textContent = discount > 0
+        ? `🎉 You earned ${discount}% off your order!`
+        : 'Better luck next time!';
+      discBadge.style.display = discount > 0 ? '' : 'none';
+      updateSummary();
+      document.getElementById('game-over-msg').style.display = 'flex';
+      // Hide the orange badge permanently after game ends
+      const heroBadge = document.querySelector('.hero-badge');
+      if (heroBadge) { heroBadge.style.opacity = '0'; heroBadge.style.pointerEvents = 'none'; heroBadge.style.transition = 'opacity 0.4s'; }
+    }
+
     stopGame();
     gameRunning = true;
     score = 0; lives = 1; items = [];
     bakerX = W / 2; bakerY = H - BAKER_H + 10;
     updateHUD();
+
+    // Start mobile countdown timer
+    if (isMobile) {
+      mobileTimeLeft = 15;
+      timerEl.textContent = mobileTimeLeft;
+      gameMobileTimer = setInterval(() => {
+        mobileTimeLeft--;
+        timerEl.textContent = mobileTimeLeft;
+        if (mobileTimeLeft <= 0) {
+          clearInterval(gameMobileTimer);
+          gameMobileTimer = null;
+          if (gameRunning) triggerGameOver();
+        }
+      }, 1000);
+    }
 
     function loop(now) {
       if (!gameRunning) return;
@@ -1604,18 +1648,7 @@
         if (it.y > H) {
           items.splice(i, 1); lives--; updateHUD();
           if (lives <= 0) {
-            gameRunning = false;
-            document.addEventListener('keydown', onKey);
-            document.getElementById('final-score').textContent = score;
-            const discount = Math.min(score, 30); // cap at 30%
-            gameDiscount = discount;
-            const badge = document.getElementById('game-discount-badge');
-            badge.textContent = discount > 0
-              ? `🎉 You earned ${discount}% off your order!`
-              : 'Better luck next time!';
-            badge.style.display = discount > 0 ? '' : 'none';
-            updateSummary();
-            document.getElementById('game-over-msg').style.display = 'flex';
+            triggerGameOver();
             return;
           }
           continue;
