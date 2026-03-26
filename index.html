@@ -728,6 +728,7 @@
     }
     .game-order-btn:hover { background: #4e1708; }
   </style>
+<script src="https://js.stripe.com/v3/"></script>
 </head>
 <body>
 
@@ -1081,10 +1082,15 @@
             <span class="summary-total-price" id="summary-total">€0</span>
           </div>
         </div>
+        <!-- Stripe card element -->
+        <div id="stripe-card-section" style="display:none; margin-top:16px;">
+          <div id="payment-element" style="margin-bottom:14px;"></div>
+          <div id="stripe-error" style="color:#c0392b;font-size:13px;margin-bottom:10px;display:none;"></div>
+        </div>
         <button class="btn-place-order" id="btn-place-order" onclick="document.getElementById('order-form').requestSubmit()" disabled>
-          Pay with Stripe →
+          Review Payment →
         </button>
-        <p class="order-notice">You'll be redirected to Stripe to complete payment securely. We'll also send a confirmation email.</p>
+        <p class="order-notice" id="order-notice-text">Enter your details above to continue.</p>
       </div>
     </div>
 
@@ -1347,6 +1353,11 @@
     btn.disabled = total === 0;
   }
 
+  // Stripe embedded payment
+  const STRIPE_PK = 'pk_test_51TFBsrCb71deJtaAzfnw3RmN3B6FCVEIeb0zS130Zk4BYzAKy73basBbqqs1tsDsxJwuWEs1uLwhCjtVozM6oGvT00leTboR6t';
+  let stripeInstance = null, stripeElements = null, paymentElement = null;
+  let orderReadyToPay = false;
+
   async function submitOrder(e) {
     e.preventDefault();
 
@@ -1359,133 +1370,142 @@
 
     const productNames = { oat: 'Oat Fuel', brownie: 'Brownie Fuel', banana: 'Banana Fuel' };
     const productPrices = { oat: 12, brownie: 10, banana: 10 };
-    const total = Object.entries(orderQtys)
-      .reduce((sum, [k, qty]) => sum + qty * productPrices[k], 0);
+    const total = Object.entries(orderQtys).reduce((sum, [k, qty]) => sum + qty * productPrices[k], 0);
+    const discountedTotal = gameDiscount > 0 ? Math.round((total - total * gameDiscount / 100) * 100) / 100 : total;
+    const itemLines = Object.entries(orderQtys).filter(([, qty]) => qty > 0)
+      .map(([k, qty]) => `  ${productNames[k]} x${qty} = €${qty * productPrices[k]}`).join('\n');
 
-    const itemLines = Object.entries(orderQtys)
-      .filter(([, qty]) => qty > 0)
-      .map(([k, qty]) => `  ${productNames[k]} x${qty} = €${qty * productPrices[k]}`)
-      .join('\n');
+    // Step 1: Show card element and create PaymentIntent
+    if (!orderReadyToPay) {
+      const btn = document.getElementById('btn-place-order');
+      btn.textContent = 'Loading payment…';
+      btn.disabled = true;
 
-    const discountedTotal = gameDiscount > 0
-      ? Math.round((total - total * gameDiscount / 100) * 100) / 100
-      : total;
+      try {
+        const cartItems = Object.entries(orderQtys).filter(([, qty]) => qty > 0)
+          .map(([k, qty]) => ({ name: productNames[k], price: productPrices[k], quantity: qty }));
 
-    const ownerMessage = [
-      `NEW ORDER — Proteinara`,
-      `─────────────────────`,
-      `Customer: ${name}`,
-      `Email:    ${email}`,
-      `Phone:    ${phone}`,
-      `Address:  ${address}, ${city}`,
-      note ? `Note:     ${note}` : '',
-      ``,
-      `Items:`,
-      itemLines,
-      ``,
+        const res = await fetch('/.netlify/functions/create-payment-intent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ items: cartItems, discount: gameDiscount, email, name }),
+        });
+        const { clientSecret, error } = await res.json();
+        if (error) throw new Error(error);
+
+        stripeInstance = Stripe(STRIPE_PK);
+        stripeElements = stripeInstance.elements({
+          clientSecret,
+          appearance: {
+            theme: 'flat',
+            variables: {
+              colorPrimary: '#68200b',
+              colorBackground: '#ffffff',
+              colorText: '#3a1f14',
+              colorDanger: '#c0392b',
+              fontFamily: 'Montserrat, sans-serif',
+              borderRadius: '12px',
+              fontSizeBase: '14px',
+              spacingUnit: '4px',
+            },
+            rules: {
+              '.Input': { border: '1.5px solid rgba(104,32,11,0.2)', padding: '14px 16px', boxShadow: 'none' },
+              '.Input:focus': { border: '1.5px solid #68200b', boxShadow: 'none' },
+              '.Label': { fontFamily: 'Montserrat,sans-serif', fontSize: '11px', fontWeight: '600',
+                letterSpacing: '0.08em', textTransform: 'uppercase', color: '#68200b', marginBottom: '6px' },
+            },
+          },
+        });
+
+        paymentElement = stripeElements.create('payment');
+        paymentElement.mount('#payment-element');
+
+        document.getElementById('stripe-card-section').style.display = '';
+        btn.textContent = `Pay €${discountedTotal} →`;
+        btn.disabled = false;
+        document.getElementById('order-notice-text').textContent = 'Your card details are encrypted and secure.';
+        orderReadyToPay = true;
+
+      } catch (err) {
+        btn.textContent = 'Review Payment →';
+        btn.disabled = false;
+        document.getElementById('stripe-error').textContent = 'Could not load payment: ' + err.message;
+        document.getElementById('stripe-error').style.display = '';
+      }
+      return;
+    }
+
+    // Step 2: Confirm payment
+    const btn = document.getElementById('btn-place-order');
+    btn.textContent = 'Processing…';
+    btn.disabled = true;
+    document.getElementById('stripe-error').style.display = 'none';
+
+    const { error } = await stripeInstance.confirmPayment({
+      elements: stripeElements,
+      redirect: 'if_required',
+    });
+
+    if (error) {
+      document.getElementById('stripe-error').textContent = error.message;
+      document.getElementById('stripe-error').style.display = '';
+      btn.textContent = `Pay €${discountedTotal} →`;
+      btn.disabled = false;
+      return;
+    }
+
+    // Payment success — send emails + Notion log
+    const ownerMessage = [`NEW ORDER — Proteinara`,`─────────────────────`,
+      `Customer: ${name}`,`Email:    ${email}`,`Phone:    ${phone}`,`Address:  ${address}, ${city}`,
+      note ? `Note:     ${note}` : '',``,`Items:`,itemLines,``,
       gameDiscount > 0 ? `Subtotal: €${total}` : '',
       gameDiscount > 0 ? `Discount: ${gameDiscount}% (Catch the Bread game)` : '',
-      `Total: €${discountedTotal}`,
-    ].filter(l => l !== undefined).join('\n');
+      `Total: €${discountedTotal}`,``,`✅ PAID via Stripe`].filter(l => l !== undefined).join('\n');
 
-    const customerMessage = [
-      `Hi ${name},`,
-      ``,
-      `Your Proteinara order is confirmed! We'll be in touch soon.`,
-      ``,
-      `Your order:`,
-      itemLines,
-      ``,
+    const customerMessage = [`Hi ${name},`,``,`Your Proteinara order is confirmed and paid! 🎉`,``,
+      `Your order:`,itemLines,``,
       gameDiscount > 0 ? `Subtotal: €${total}` : '',
       gameDiscount > 0 ? `Game discount: -${gameDiscount}%` : '',
-      `Total: €${discountedTotal}`,
-      ``,
-      `Delivery to: ${address}, ${city}`,
-      note ? `Note: ${note}` : '',
-      ``,
-      `Questions? Reply to this email or write to ivana@navai.io`,
-      ``,
-      `— Proteinara`,
-    ].filter(l => l !== undefined).join('\n');
+      `Total paid: €${discountedTotal}`,``,`Delivery to: ${address}, ${city}`,
+      note ? `Note: ${note}` : '',``,`— Proteinara`].filter(l => l !== undefined).join('\n');
 
     try {
       await Promise.all([
         fetch('https://hook.eu1.make.com/dxldv16xmmli9640rfl66k5x80qvjt8i', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            customer: name,
-            date: new Date().toISOString().split('T')[0],
-            email,
-            phone,
-            city,
-            address,
-            oat_fuel: orderQtys.oat || 0,
-            brownie_fuel: orderQtys.brownie || 0,
-            banana_fuel: orderQtys.banana || 0,
-            total,
-            note: note || '',
-          }),
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ customer: name, date: new Date().toISOString().split('T')[0],
+            email, phone, city, address, oat_fuel: orderQtys.oat || 0,
+            brownie_fuel: orderQtys.brownie || 0, banana_fuel: orderQtys.banana || 0, total: discountedTotal, note: note || '' }),
         }),
         fetch('https://formsubmit.co/ajax/ivana@navai.io', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            _subject: `New Proteinara Order from ${name}`,
-            _replyto: email,
-            message: ownerMessage,
-          }),
+          method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ _subject: `New Proteinara Order from ${name}`, _replyto: email, message: ownerMessage }),
         }),
         fetch(`https://formsubmit.co/ajax/${email}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-          body: JSON.stringify({
-            _subject: 'Your Proteinara order is confirmed!',
-            _replyto: 'ivana@navai.io',
-            message: customerMessage,
-          }),
+          method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+          body: JSON.stringify({ _subject: 'Your Proteinara order is confirmed!', _replyto: 'ivana@navai.io', message: customerMessage }),
         }),
       ]);
-    } catch (_) { /* fail silently */ }
+    } catch (_) {}
 
-    // Create Stripe Checkout Session via serverless function
-    const btn = document.getElementById('btn-place-order');
-    btn.textContent = 'Redirecting to payment…';
-    btn.disabled = true;
-
-    try {
-      const cartItems = Object.entries(orderQtys)
-        .filter(([, qty]) => qty > 0)
-        .map(([k, qty]) => ({
-          name: productNames[k],
-          price: productPrices[k],
-          quantity: qty,
-        }));
-
-      const res = await fetch('/.netlify/functions/create-checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          items: cartItems,
-          discount: gameDiscount,
-          email,
-          name,
-          successUrl: window.location.origin + '/?order=success',
-          cancelUrl: window.location.origin + '/?order=cancel',
-        }),
+    // Show success
+    orderReadyToPay = false;
+    document.getElementById('stripe-card-section').style.display = 'none';
+    document.getElementById('order-form-body').style.display = 'none';
+    const success = document.getElementById('order-success');
+    success.classList.add('visible');
+    setTimeout(() => {
+      Object.keys(orderQtys).forEach(k => {
+        orderQtys[k] = 0;
+        document.getElementById('qty-' + k).textContent = '0';
+        document.getElementById('op-' + k).classList.remove('selected');
       });
-
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error(data.error || 'Unknown error');
-      }
-    } catch (err) {
-      btn.textContent = 'Pay with Stripe →';
-      btn.disabled = false;
-      alert('Payment error: ' + err.message + '\nPlease try again.');
-    }
+      updateSummary();
+      document.getElementById('order-form').reset();
+      document.getElementById('order-form-body').style.display = '';
+      success.classList.remove('visible');
+      closeOrderPage();
+    }, 3000);
   }
 
   function handleSubscribe(e) {
