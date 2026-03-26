@@ -1471,12 +1471,6 @@
 
     try {
       await Promise.all([
-        fetch('https://hook.eu1.make.com/dxldv16xmmli9640rfl66k5x80qvjt8i', {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ customer: name, date: new Date().toISOString().split('T')[0],
-            email, phone, city, address, oat_fuel: orderQtys.oat || 0,
-            brownie_fuel: orderQtys.brownie || 0, banana_fuel: orderQtys.banana || 0, total: discountedTotal, note: note || '' }),
-        }),
         fetch('/.netlify/functions/send-order-email', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name, email, phone, city, address, note,
