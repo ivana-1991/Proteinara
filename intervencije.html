@@ -1705,60 +1705,20 @@ document.getElementById('resetBtn').addEventListener('click', () => {
 /* ═══════════════════════════════════════════════
    DETAIL PAGE
 ═══════════════════════════════════════════════ */
-const detailPage = document.getElementById('detailPage');
-const dpBack     = document.getElementById('dpBack');
-const dpChat     = document.getElementById('dpChat');
-const dpChatClose   = document.getElementById('dpChatClose');
-const dpChatToggle  = document.getElementById('dpChatToggle');
 
 function openDetail(row) {
-  // Populate dynamic fields from row data
-  document.getElementById('dpTitle').textContent   = 'Intervencija: ' + row.broj;
-  document.getElementById('dp-broj').textContent   = row.broj.replace('M','');
-  document.getElementById('dp-datum').textContent  = row.datum.split(' ')[0];
-  document.getElementById('dp-korisnik').textContent = row.name;
-  document.getElementById('dp-tel').textContent    = row.tel;
-  document.getElementById('dp-sasija').textContent = row.sasija;
-  document.getElementById('dp-marka').textContent  = row.marka;
-  document.getElementById('dp-reg').textContent    = row.reg;
-
-  // Reset to first tab
-  switchTab('opce');
-
-  // Show
-  detailPage.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeDetail() {
-  detailPage.classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-dpBack.addEventListener('click', closeDetail);
-
-// Tab switching
-function switchTab(name) {
-  document.querySelectorAll('.dp-tab').forEach(t => t.classList.toggle('active', t.dataset.panel === name));
-  document.querySelectorAll('.dp-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
-}
-document.querySelectorAll('.dp-tab').forEach(tab => {
-  tab.addEventListener('click', () => switchTab(tab.dataset.panel));
-});
-
-// Chat toggle
-dpChatClose.addEventListener('click', () => {
-  dpChat.classList.add('collapsed');
-});
-dpChatToggle.addEventListener('click', () => {
-  dpChat.classList.toggle('collapsed');
-});
-
-// Row click → open detail
-function openDetailFromRow(e) {
-  const tr = e.currentTarget;
-  const idx = +tr.dataset.rowIdx;
-  if (!isNaN(idx) && currentData[idx]) openDetail(currentData[idx]);
+  const params = new URLSearchParams({
+    broj:   row.broj,
+    datum:  row.datum,
+    name:   row.name,
+    tel:    row.tel,
+    sasija: row.sasija,
+    marka:  row.marka,
+    reg:    row.reg,
+    partner: row.partner,
+    status: row.status,
+  });
+  window.location.href = 'intervencija.html?' + params.toString();
 }
 
 /* ═══════════════════════════════════════════════
