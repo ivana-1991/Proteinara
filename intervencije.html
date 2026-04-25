@@ -497,6 +497,35 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .state-lbl { font-size: 14px; font-weight: 600; color: var(--grey-600); }
+
+    /* ─── USER DROPDOWN ─── */
+    .nav-user-wrap { position: relative; flex-shrink: 0; }
+    .nav-dropdown {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      width: 208px; background: #fff;
+      border: 1px solid var(--grey-50); border-radius: 8px;
+      box-shadow: 0 4px 8px 3px rgba(0,0,0,.15), 0 1px 3px rgba(0,0,0,.3);
+      overflow: hidden; z-index: 300;
+      opacity: 0; pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity .15s, transform .15s;
+    }
+    .nav-dropdown.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+    .nav-dd-header { padding: 8px 12px 6px; }
+    .nav-dd-name { font-size: 16px; font-weight: 600; color: var(--grey-800); line-height: 24px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .nav-dd-email { font-size: 12px; color: var(--grey-400); line-height: 16px; }
+    .nav-dd-items { padding: 2px 4px 4px; display: flex; flex-direction: column; }
+    .nav-dd-item {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0 12px; height: 44px; border-radius: 4px;
+      cursor: pointer; font-size: 14px; font-weight: 600;
+      color: var(--grey-500); font-family: 'Inter', sans-serif;
+      transition: background .1s;
+    }
+    .nav-dd-item:hover { background: var(--bg-table); }
+    .nav-dd-item.blue { color: var(--blue-500); background: var(--bg-dropdown); }
+    .nav-dd-item.blue:hover { background: #c4ebf7; }
+    .nav-dd-icon { width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -597,9 +626,27 @@
       <a class="nav-link" href="#">Import</a>
     </div>
   </div>
-  <button class="nav-user-btn" title="Profil">
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#545252"/></svg>
-  </button>
+  <div class="nav-user-wrap">
+    <button class="nav-user-btn" id="navUserBtn" title="Profil">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#545252"/></svg>
+    </button>
+    <div class="nav-dropdown" id="navDropdown">
+      <div class="nav-dd-header">
+        <div class="nav-dd-name">Porsche Croatia</div>
+        <div class="nav-dd-email">partner@email.com</div>
+      </div>
+      <div class="nav-dd-items">
+        <div class="nav-dd-item blue">
+          <span class="nav-dd-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg></span>
+          Odjava
+        </div>
+        <div class="nav-dd-item">
+          <span class="nav-dd-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg></span>
+          Izmjena Lozinke
+        </div>
+      </div>
+    </div>
+  </div>
 </nav>
 
 <!-- ══════════════════ DROPDOWN BACKDROP ══════════════════ -->
@@ -1727,6 +1774,16 @@ function openDetail(row) {
 renderHeader();
 renderTableBody(currentData);
 renderPagination(1, 7);
+
+// User dropdown
+(function() {
+  const btn = document.getElementById('navUserBtn');
+  const dd  = document.getElementById('navDropdown');
+  if (!btn || !dd) return;
+  btn.addEventListener('click', e => { e.stopPropagation(); dd.classList.toggle('open'); });
+  document.addEventListener('click', () => dd.classList.remove('open'));
+  dd.addEventListener('click', e => e.stopPropagation());
+})();
 </script>
 </body>
 </html>
