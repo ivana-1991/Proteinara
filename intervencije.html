@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=1024, initial-scale=1">
+  <title>Intervencije – Partner Portal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --blue-800: #083c55; --blue-700: #0d5475; --blue-600: #136c93;
+      --blue-500: #1a82ae; --blue-400: #2299c8; --blue-300: #37aada;
+      --blue-200: #56bce3; --blue-100: #7ecfec; --blue-50: #aae0f2;
+      --grey-800: #1e1d1d; --grey-700: #2e2d2d; --grey-600: #403f3f;
+      --grey-500: #545252; --grey-400: #696767; --grey-300: #888686;
+      --grey-200: #a8a6a6; --grey-100: #bfbdbd; --grey-50: #d6d4d4;
+      --green-50: #a8f0b5; --green-800: #085317;
+      --red-50: #f9c0bb;   --red-800: #730b04; --red-300: #e84031;
+      --yellow-50: #fbe9a8; --yellow-800: #6e4e08;
+      --bg-table: #f4f4f4; --bg-dropdown: #ddf3fa;
+    }
+
+    html, body { height: 100%; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #fff;
+      color: var(--grey-800);
+      min-width: 1024px;
+    }
+
+    /* ─── NAV ─────────────────────────────────────── */
+    .nav {
+      height: 64px;
+      background: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 clamp(16px, 1.67vw, 24px);
+      box-shadow: 0 4px 4px rgba(191,189,189,.4);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-left { display: flex; align-items: center; gap: clamp(16px, 2.22vw, 32px); }
+
+    /* Logo */
+    .nav-logo { display: flex; align-items: center; text-decoration: none; flex-shrink: 0; height: 24px; }
+
+    .nav-links { display: flex; align-items: center; }
+    .nav-link {
+      padding: clamp(8px, 1.11vw, 16px) clamp(5px, 0.7vw, 14px);
+      font-size: clamp(11px, 0.9vw, 14px);
+      font-weight: 600; line-height: 20px;
+      color: var(--grey-500); cursor: pointer;
+      white-space: nowrap; text-decoration: none;
+    }
+    .nav-link.active { color: var(--blue-500); }
+    .nav-link:hover:not(.active) { color: var(--grey-700); }
+
+    .nav-user-btn {
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border-radius: 50%; border: none; background: none;
+      flex-shrink: 0;
+    }
+    .nav-user-btn:hover { background: var(--bg-table); }
+
+    /* ─── LAYOUT ─────────────────────────────────── */
+    .page-content { padding: clamp(16px, 1.67vw, 24px); padding-bottom: 48px; }
+
+    .page-title {
+      font-size: clamp(20px, 1.67vw, 24px);
+      font-weight: 700; line-height: 32px;
+      color: var(--grey-800); margin-bottom: 24px;
+    }
+
+    /* ─── FILTER BAR ──────────────────────────────── */
+    .filter-bar {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 16px;
+    }
+    .filter-left  { display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0; }
+    .filter-right { display: flex; align-items: center; gap: 16px; flex-shrink: 0; }
+
+    /* shared field base */
+    .field-wrap { position: relative; height: 40px; flex: 1; min-width: 160px; max-width: 340px; }
+    .field-icon {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      pointer-events: none; display: flex; align-items: center; color: var(--grey-300);
+    }
+    .field-float {
+      display: none; position: absolute; top: -8px; left: 8px;
+      background: #fff; padding: 0 4px; font-size: 11px; font-weight: 500;
+      color: var(--blue-500); line-height: 1; white-space: nowrap;
+    }
+    .field-base {
+      height: 40px; border: 1px solid var(--grey-50); border-radius: 4px;
+      padding: 0 12px 0 34px; font-family: 'Inter', sans-serif;
+      font-size: 14px; color: var(--grey-800); background: #fff; outline: none;
+      width: 100%; transition: border-color .15s;
+      cursor: pointer; display: flex; align-items: center; user-select: none;
+    }
+    input.field-base { cursor: text; }
+    input.field-base::placeholder { color: var(--grey-300); }
+    .field-base:focus, .field-base.open { border-color: var(--blue-400); }
+    .field-base.has-value { border-color: var(--blue-300); }
+    .field-base.has-value ~ .field-float,
+    .field-base:focus ~ .field-float,
+    .field-base.open ~ .field-float { display: block; }
+
+    /* dropdown arrow */
+    .field-arrow {
+      position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+      pointer-events: none; transition: transform .15s; color: var(--grey-400);
+    }
+    .field-base.open ~ .field-arrow svg { transform: rotate(180deg); }
+
+    /* Buttons */
+    .btn-primary {
+      height: 40px; padding: 0 clamp(12px, 1.25vw, 24px);
+      background: var(--blue-500); color: #fff;
+      border: none; border-radius: 4px; font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap;
+      flex-shrink: 0; transition: background .15s;
+    }
+    .btn-primary:hover { background: var(--blue-600); }
+    .btn-primary:active { background: var(--blue-700); }
+
+    .btn-secondary {
+      height: 40px; padding: 0 16px; background: #fff;
+      color: var(--blue-500); border: 1px solid var(--blue-500);
+      border-radius: 4px; font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap;
+      display: flex; align-items: center; gap: 8px; transition: background .15s;
+      flex-shrink: 0;
+    }
+    .btn-secondary:hover { background: var(--bg-dropdown); }
+
+    /* Export button – icon-only at narrow, full text at wider */
+    #exportBtn { width: 40px; padding: 0; justify-content: center; gap: 0; }
+    .export-label { display: none; }
+    @media (min-width: 1300px) {
+      #exportBtn { width: auto; padding: 0 16px; gap: 8px; }
+      .export-label { display: inline; }
+    }
+
+    .btn-reset {
+      height: 40px; padding: 0 16px; background: none; border: none;
+      color: var(--blue-500); font-family: 'Inter', sans-serif;
+      font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap;
+      display: none; align-items: center; gap: 8px; flex-shrink: 0;
+      border-radius: 4px; transition: background .15s;
+    }
+    .btn-reset.visible { display: flex; }
+    .btn-reset:hover { background: rgba(26,130,174,.08); }
+
+    /* ─── TABLE ───────────────────────────────────── */
+    .table-section { margin-top: 32px; }
+
+    .table-scroll {
+      overflow-x: auto; border-radius: 4px;
+      border: 1px solid var(--grey-50); background: #fff;
+    }
+
+    table { border-collapse: collapse; table-layout: fixed; }
+
+    thead tr { background: var(--bg-table); border-bottom: 1px solid var(--grey-50); }
+    thead th {
+      padding: 0 8px; font-size: 10px; font-weight: 600;
+      color: var(--grey-400); letter-spacing: .5px; text-transform: uppercase;
+      white-space: nowrap; text-align: left; height: 40px;
+      position: relative; user-select: none; overflow: hidden;
+    }
+    .th-inner { display: flex; align-items: center; gap: 4px; height: 100%; overflow: hidden; }
+    .th-label { flex: 1; overflow: hidden; text-overflow: ellipsis; }
+    .sort-grp {
+      display: flex; align-items: center; gap: 1px; opacity: .45;
+      cursor: pointer; padding: 2px 4px; border-radius: 2px; flex-shrink: 0;
+      transition: opacity .15s;
+    }
+    .sort-grp:hover, .sort-grp.active { opacity: 1; background: rgba(0,0,0,.06); }
+    .sort-arrow { display: block; flex-shrink: 0; transition: transform .2s; }
+
+    /* Column drag-to-reorder */
+    thead th.col-dragging  { opacity: .3; cursor: grabbing; }
+    thead th.col-drag-over { box-shadow: inset 3px 0 0 var(--blue-400); background: var(--bg-dropdown); }
+
+    /* Column resize handle */
+    .col-resize-handle {
+      position: absolute; top: 0; right: 0; bottom: 0;
+      width: 6px; cursor: col-resize; z-index: 2;
+    }
+    .col-resize-handle::after {
+      content: ''; position: absolute;
+      top: 20%; bottom: 20%; right: 1px; width: 2px;
+      border-radius: 1px; background: transparent; transition: background .15s;
+    }
+    .col-resize-handle:hover::after,
+    .col-resize-handle.resizing::after { background: var(--blue-400); }
+
+    tbody tr {
+      border-bottom: 1px solid var(--grey-50); cursor: pointer;
+      transition: background .1s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #f5fbfe; }
+
+    tbody td {
+      padding: 12px 8px; font-size: 14px; font-weight: 400;
+      color: var(--grey-800); line-height: 20px; vertical-align: middle;
+      white-space: nowrap;
+    }
+    .td-num { color: var(--grey-800); }
+    .td-date { color: var(--grey-800); }
+
+    .contact-cell { display: flex; align-items: center; gap: 8px; }
+    .avatar {
+      height: 24px; min-width: 24px; padding: 4px 2px;
+      border-radius: 300px; border: 1px solid var(--grey-100);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 600; color: var(--grey-600);
+      background: #fff; flex-shrink: 0; line-height: 16px;
+      text-transform: uppercase;
+    }
+    .avatar-name { font-size: 14px; white-space: nowrap; font-weight: 400; color: var(--grey-800); }
+
+    .badge {
+      display: inline-flex; align-items: center; padding: 3px 10px;
+      border-radius: 4px; font-size: 12px; font-weight: 600; white-space: nowrap;
+    }
+    .b-blue   { background: var(--blue-50);   color: var(--blue-800); }
+    .b-grey   { background: var(--grey-50);   color: var(--grey-700); }
+    .b-red    { background: var(--red-50);    color: var(--red-800);  }
+    .b-green  { background: var(--green-50);  color: var(--green-800);}
+    .b-yellow { background: var(--yellow-50); color: var(--yellow-800);}
+
+    /* ─── PAGINATION ──────────────────────────────── */
+    .pag-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-top: 1px solid var(--grey-50);
+      font-size: 13px; color: var(--grey-400);
+    }
+    .pag-ctrl { display: flex; align-items: center; gap: 2px; }
+    .pg-btn {
+      width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: 500;
+      border: none; background: none; color: var(--grey-700);
+      font-family: 'Inter', sans-serif; transition: background .1s;
+    }
+    .pg-btn:hover:not(:disabled):not(.active) { background: var(--bg-table); }
+    .pg-btn.active { background: var(--blue-500); color: #fff; }
+    .pg-btn:disabled { opacity: .3; cursor: not-allowed; }
+    .pg-sep { padding: 0 4px; color: var(--grey-300); font-size: 13px; }
+
+    /* ─── OVERLAYS ────────────────────────────────── */
+    .overlay-back {
+      position: fixed; inset: 0; z-index: 200; display: none;
+    }
+    .overlay-back.open { display: block; }
+
+    /* Dropdown popup */
+    .dd-popup {
+      position: fixed; background: #fff;
+      border: 1px solid var(--grey-100); border-radius: 6px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      width: clamp(220px, 18vw, 280px); z-index: 300; overflow: hidden;
+      display: none;
+    }
+    .dd-popup.open { display: block; }
+
+    .dd-head {
+      position: relative; display: flex; align-items: center;
+      gap: 8px; padding: 10px 12px;
+      border-bottom: 1px solid var(--grey-50); background: #fff;
+    }
+    .dd-label {
+      position: absolute; top: -8px; left: 8px; background: #fff;
+      padding: 0 4px; font-size: 11px; font-weight: 500;
+      color: var(--blue-500); line-height: 1;
+    }
+    .dd-search-in {
+      flex: 1; border: none; outline: none; font-size: 14px;
+      color: var(--grey-800); font-family: 'Inter', sans-serif;
+    }
+    .dd-search-in::placeholder { color: var(--grey-300); }
+    .dd-clear-btn {
+      cursor: pointer; color: var(--grey-300); display: flex;
+      align-items: center; background: none; border: none; padding: 2px;
+    }
+    .dd-clear-btn:hover { color: var(--grey-500); }
+
+    .dd-list { max-height: 280px; overflow-y: auto; }
+    .dd-item {
+      display: flex; align-items: center; gap: 12px; padding: 11px 16px;
+      font-size: 14px; color: var(--grey-700); cursor: pointer; transition: background .1s;
+    }
+    .dd-item:hover { background: var(--bg-dropdown); }
+
+    .chk {
+      width: 18px; height: 18px; border: 2px solid var(--grey-200);
+      border-radius: 3px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; background: #fff; transition: all .1s;
+    }
+    .chk.on { background: var(--blue-500); border-color: var(--blue-500); }
+
+    /* Calendar popup */
+    .cal-popup {
+      position: fixed; background: #fff;
+      border: 1px solid var(--grey-100); border-radius: 6px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      padding: 16px; z-index: 300; width: 292px; display: none;
+    }
+    .cal-popup.open { display: block; }
+
+    .cal-nav-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+    .cal-nav-grp { display: flex; align-items: center; gap: 2px; }
+    .cal-btn {
+      width: 28px; height: 28px; border: none; background: none;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      border-radius: 4px; color: var(--grey-600);
+    }
+    .cal-btn:hover { background: var(--bg-table); }
+    .cal-sel {
+      border: none; font-size: 14px; font-weight: 600; color: var(--grey-800);
+      background: none; cursor: pointer; font-family: 'Inter', sans-serif;
+      appearance: none; text-align: center;
+    }
+
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-dname {
+      text-align: center; font-size: 12px; font-weight: 600;
+      color: var(--grey-400); padding: 6px 0;
+    }
+    .cal-day {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      border-radius: 50%; cursor: pointer; font-size: 13px; color: var(--grey-700);
+      transition: background .1s;
+    }
+    .cal-day.other { color: var(--grey-200); }
+    .cal-day:hover:not(.empty):not(.sel) { background: var(--bg-dropdown); }
+    .cal-day.today { border: 2px solid var(--blue-500); font-weight: 600; color: var(--blue-500); }
+    .cal-day.sel   { background: var(--blue-500) !important; color: #fff !important; border: none; }
+    .cal-day.empty { cursor: default; }
+
+    .cal-footer {
+      display: flex; justify-content: flex-end; gap: 8px;
+      margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--grey-50);
+    }
+    .cal-cancel {
+      padding: 6px 16px; background: none; border: none;
+      font-size: 14px; font-weight: 600; color: var(--grey-500);
+      cursor: pointer; border-radius: 4px; font-family: 'Inter', sans-serif;
+    }
+    .cal-cancel:hover { background: var(--bg-table); }
+    .cal-ok {
+      padding: 6px 20px; background: var(--blue-500); border: none;
+      font-size: 14px; font-weight: 600; color: #fff;
+      cursor: pointer; border-radius: 4px; font-family: 'Inter', sans-serif;
+    }
+    .cal-ok:hover { background: var(--blue-600); }
+
+    /* ─── DETAIL PAGE ──────────────────────────────── */
+    #detailPage {
+      display: none; position: fixed; inset: 0; top: 64px;
+      background: #fff; z-index: 50; overflow: hidden;
+      flex-direction: column;
+    }
+    #detailPage.open { display: flex; }
+
+    .dp-header {
+      background: #fff; border-bottom: 1px solid var(--grey-50);
+      padding: 16px clamp(16px,1.67vw,24px) 0;
+      flex-shrink: 0;
+    }
+    .dp-back {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 14px; font-weight: 500; color: var(--grey-500);
+      cursor: pointer; border: none; background: none;
+      font-family: 'Inter',sans-serif; padding: 0; margin-bottom: 8px;
+    }
+    .dp-back:hover { color: var(--grey-800); }
+    .dp-title-row {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px; gap: 16px;
+    }
+    .dp-title {
+      font-size: clamp(20px,1.67vw,24px); font-weight: 700;
+      color: var(--grey-800); line-height: 1.2;
+    }
+    .dp-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .dp-tabs { display: flex; align-items: flex-end; }
+    .dp-tab {
+      display: flex; align-items: center; gap: 7px;
+      padding: 10px 16px; font-size: 14px; font-weight: 500;
+      color: var(--grey-400); cursor: pointer; border: none;
+      background: none; font-family: 'Inter',sans-serif;
+      border-bottom: 2px solid transparent; white-space: nowrap;
+      transition: color .15s, border-color .15s;
+    }
+    .dp-tab:hover { color: var(--grey-700); }
+    .dp-tab.active { color: var(--blue-500); border-bottom-color: var(--blue-500); font-weight: 600; }
+    .dp-body { display: flex; flex: 1; overflow: hidden; }
+    .dp-content { flex: 1; overflow-y: auto; padding: 24px clamp(16px,1.67vw,24px); }
+    .dp-panel { display: none; }
+    .dp-panel.active { display: block; }
+
+    /* Chat panel */
+    .dp-chat {
+      width: 360px; flex-shrink: 0; border-left: 1px solid var(--grey-50);
+      display: flex; flex-direction: column; background: #fff;
+      transition: width .2s, opacity .2s; overflow: hidden;
+    }
+    .dp-chat.collapsed { width: 0; opacity: 0; border: none; }
+    .dp-chat-head {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-bottom: 1px solid var(--grey-50); flex-shrink: 0;
+    }
+    .dp-chat-title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: var(--grey-800); }
+    .dp-chat-close {
+      width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; border: none; background: none; border-radius: 4px; color: var(--grey-400);
+    }
+    .dp-chat-close:hover { background: var(--bg-table); color: var(--grey-700); }
+    .dp-chat-msgs { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+    .chat-badge { background: var(--bg-dropdown); color: var(--blue-700); font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 4px; align-self: flex-start; }
+    .chat-msg-group { display: flex; flex-direction: column; gap: 6px; }
+    .chat-msg-author { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--grey-700); }
+    .chat-av { width: 24px; height: 24px; border-radius: 50%; background: var(--bg-dropdown); color: var(--blue-700); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+    .chat-bubble { background: var(--bg-table); border-radius: 0 8px 8px 8px; padding: 10px 12px; font-size: 13px; line-height: 1.6; color: var(--grey-700); }
+    .chat-bubble.alt { background: var(--bg-dropdown); }
+    .dp-chat-input { padding: 12px 16px; border-top: 1px solid var(--grey-50); flex-shrink: 0; }
+    .chat-textarea-wrap { position: relative; margin-bottom: 10px; }
+    .chat-textarea-label { position: absolute; top: -8px; left: 8px; background: #fff; padding: 0 4px; font-size: 11px; color: var(--grey-400); font-weight: 500; }
+    .chat-textarea { width: 100%; border: 1px solid var(--grey-100); border-radius: 4px; padding: 10px 12px; font-size: 14px; color: var(--grey-800); font-family: 'Inter',sans-serif; resize: none; outline: none; min-height: 60px; }
+    .chat-textarea:focus { border-color: var(--blue-400); }
+    .chat-send { display: flex; align-items: center; gap: 8px; background: var(--blue-500); color: #fff; border: none; border-radius: 4px; padding: 9px 16px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: 'Inter',sans-serif; }
+    .chat-send:hover { background: var(--blue-600); }
+    .btn-chat-toggle { height: 40px; padding: 0 14px; background: #fff; color: var(--grey-600); border: 1px solid var(--grey-50); border-radius: 4px; font-family: 'Inter',sans-serif; font-size: 14px; font-weight: 500; cursor: pointer; display: flex; align-items: center; gap: 7px; transition: background .15s; }
+    .btn-chat-toggle:hover { background: var(--bg-table); }
+
+    /* Form fields */
+    .ff-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 24px; margin-bottom: 4px; }
+    .ff-grid.g1 { grid-template-columns: 1fr; }
+    .ff { position: relative; }
+    .ff-label { position: absolute; top: -8px; left: 10px; background: #fff; padding: 0 4px; font-size: 11px; color: var(--grey-400); font-weight: 500; white-space: nowrap; z-index: 1; }
+    .ff-val { width: 100%; border: 1px solid var(--grey-100); border-radius: 4px; padding: 10px 12px; font-size: 14px; color: var(--grey-800); background: #fff; font-family: 'Inter',sans-serif; outline: none; transition: border-color .15s; display: flex; align-items: center; gap: 8px; min-height: 40px; }
+    .ff-val.di { padding-left: 36px; }
+    .ff-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); pointer-events: none; color: var(--grey-400); display: flex; }
+    .ff-textarea { width: 100%; border: 1px solid var(--grey-100); border-radius: 4px; padding: 10px 12px; font-size: 14px; color: var(--grey-800); font-family: 'Inter',sans-serif; outline: none; resize: vertical; min-height: 80px; }
+    .form-section { margin-bottom: 8px; }
+    .form-section-title { font-size: 11px; font-weight: 700; color: var(--grey-400); letter-spacing: .8px; text-transform: uppercase; margin-bottom: 20px; margin-top: 8px; }
+
+    /* Checkboxes */
+    .cb-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .cb-row { display: flex; align-items: center; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--grey-50); font-size: 14px; color: var(--grey-700); }
+    .cb-box { width: 20px; height: 20px; border: 2px solid var(--grey-200); border-radius: 3px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: all .1s; }
+    .cb-box.checked { background: var(--blue-500); border-color: var(--blue-500); }
+
+    /* Documents / Pozivi table */
+    .dp-table-section-title { font-size: 16px; font-weight: 600; color: var(--grey-800); margin: 24px 0 16px; }
+    .dp-table-wrap { border: 1px solid var(--grey-50); border-radius: 4px; }
+    .dp-table { width: 100%; border-collapse: collapse; }
+    .dp-table thead tr { background: var(--bg-table); border-bottom: 1px solid var(--grey-50); }
+    .dp-table thead th { padding: 0 12px; height: 40px; font-size: 10px; font-weight: 600; color: var(--grey-400); letter-spacing: .5px; text-transform: uppercase; text-align: left; }
+    .dp-table tbody tr { border-bottom: 1px solid var(--grey-50); }
+    .dp-table tbody tr:last-child { border-bottom: none; }
+    .dp-table tbody tr:hover { background: #f5fbfe; cursor: pointer; }
+    .dp-table tbody td { padding: 12px; font-size: 14px; color: var(--grey-800); }
+
+    /* Upload zone */
+    .upload-zone { border: 2px dashed var(--grey-100); border-radius: 6px; padding: 32px 24px; text-align: center; margin-bottom: 28px; }
+    .upload-zone-title { font-size: 15px; font-weight: 600; color: var(--grey-700); margin-bottom: 6px; }
+    .upload-zone-sub { font-size: 13px; color: var(--grey-300); margin-bottom: 16px; }
+
+    /* Map */
+    .map-placeholder { width: 100%; height: 260px; border-radius: 6px; border: 1px solid var(--grey-100); overflow: hidden; margin-top: 20px; }
+    .map-placeholder iframe { width: 100%; height: 100%; border: none; }
+
+    /* ─── LOADING + EMPTY ─────────────────────────── */
+    .state-box {
+      display: none; flex-direction: column; align-items: center;
+      justify-content: center; padding: 80px 24px; gap: 16px;
+      border: 1px solid var(--grey-50); border-top: none;
+      border-radius: 0 0 4px 4px; background: #fff;
+    }
+    .state-box.vis { display: flex; }
+
+    .spinner {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 4px solid var(--blue-100);
+      border-top-color: var(--blue-500);
+      border-right-color: var(--blue-300);
+      animation: spin .85s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .state-lbl { font-size: 14px; font-weight: 600; color: var(--grey-600); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ NAV ═══════════════════════ -->
+<nav class="nav">
+  <div class="nav-left">
+    <!-- Logo -->
+    <a class="nav-logo" href="#">
+      <svg width="192" height="24" viewBox="0 0 192 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block">
+<path d="M50.309 11.1144C50.4083 10.5599 50.4662 9.35164 49.1421 9.35164C48.3427 9.39716 47.6318 9.88213 47.2966 10.6096C46.6767 11.7508 46.2224 12.974 45.9476 14.2427C45.8814 14.6316 45.6414 15.9806 47.1062 15.9806C48.5711 15.9806 49.1256 14.6896 49.8456 12.6703C50.0318 12.1704 50.1865 11.659 50.309 11.1392M46.6097 18.5875C44.0111 18.5875 41.8759 16.9323 42.4718 13.5061C43.0676 10.0799 45.7407 6.70337 49.7214 6.70337C52.5683 6.70337 54.3228 8.65647 53.7849 11.7268C53.1393 15.4096 50.2842 18.5875 46.6097 18.5875Z" fill="#FF1100"/>
+<path d="M58.3945 11.677H59.6855C60.1655 11.7209 60.648 11.6257 61.0758 11.4039C61.4276 11.1888 61.6758 10.8387 61.7627 10.4357C61.9448 9.38462 60.6703 9.38462 60.3807 9.38462H59.1807L58.3945 11.677ZM62.5986 18.2977H59.2055L58.9489 14.0688H57.5834L56.0855 18.3557H52.7751L56.7393 7.00945H61.7545C62.6673 6.91014 63.5867 7.13276 64.3531 7.63841C65.0979 8.30545 65.4174 9.33166 65.1807 10.3032C64.992 11.3617 64.3978 12.3068 63.5255 12.935C63.1092 13.223 62.6516 13.4456 62.1683 13.597L62.5986 18.2977Z" fill="#FF1100"/>
+<path d="M70.8083 13.4233L69.1531 18.3226H65.6855L67.44 13.2412L65.8428 7.00952H69.5173L70.138 10.0302C70.2158 10.3008 70.2679 10.5781 70.2952 10.8578L71.0152 10.0302L73.5973 7.00952H76.7338L70.8083 13.4233Z" fill="#FF1100"/>
+<path d="M80.8386 12.4634L82.6097 18.331H78.9683L78.1986 15.451C78.0828 15.029 78.0745 14.9958 77.9669 14.6234L77.338 15.3186L74.6897 18.3227H71.6028L77.1476 12.2814L75.4924 7.00137H79.1421L79.7711 9.29378C79.8563 9.5644 79.92 9.84081 79.9614 10.1214C80.1352 9.93102 80.8552 9.13654 81.0042 8.98757L82.8414 6.96826H85.9283L80.8386 12.4634Z" fill="#FF1100"/>
+<path d="M87.7242 7.36535C87.8094 7.16425 88.0031 7.02935 88.2207 7.01777H93.0455C93.0546 7.01694 93.0629 7.01611 93.072 7.01611C93.2036 7.01611 93.312 7.12453 93.312 7.25611C93.312 7.29418 93.3029 7.33142 93.2855 7.36535L91.5642 11.9998C91.4773 12.1993 91.2853 12.3342 91.0676 12.3474H86.2345C86.2254 12.3483 86.2171 12.3491 86.208 12.3491C86.0764 12.3491 85.968 12.2407 85.968 12.1091C85.968 12.071 85.9771 12.0338 85.9945 11.9998L87.7242 7.36535Z" fill="#FF1100"/>
+<path d="M89.7103 13.3571C89.7939 13.1543 89.9883 13.0186 90.2068 13.0095H95.0316C95.0407 13.0086 95.049 13.0078 95.0581 13.0078C95.1897 13.0078 95.2981 13.1162 95.2981 13.2478C95.2981 13.2859 95.289 13.3231 95.2716 13.3571L93.5585 17.9915C93.4708 18.1943 93.2739 18.3292 93.0537 18.3391H88.2289C88.2198 18.34 88.2115 18.3408 88.2024 18.3408C88.0708 18.3408 87.9624 18.2324 87.9624 18.1008C87.9624 18.0627 87.9715 18.0255 87.9889 17.9915L89.7103 13.3571Z" fill="#FF1100"/>
+<path d="M103.125 14.0688V9.01221L99.8731 14.0688H103.125ZM103.034 18.3722V15.6412H98.8965L97.142 18.3722H95.1724L102.621 7.06738H105.17L105.277 18.3722H103.034Z" fill="#696767"/>
+<path d="M115.034 9.86468C114.942 9.34992 114.601 8.91295 114.124 8.69778C113.799 8.54054 113.442 8.45861 113.081 8.45778C112.045 8.34275 111.069 9.00151 110.789 10.0054C110.665 10.7005 111.095 11.0895 112.097 11.3792C113.992 11.9419 114.405 12.0578 114.993 12.6123C115.545 13.1874 115.773 14.0026 115.597 14.7805C115.465 15.5088 114.546 18.5792 110.334 18.5792C106.974 18.5792 106.519 16.4771 106.37 15.7654L108.364 15.1033C108.48 15.6081 108.77 16.8826 110.789 16.8826C112.61 16.8826 113.272 15.8481 113.421 15.1364C113.57 14.4247 113.048 14.0357 112.378 13.8288L110.615 13.2909C109.217 12.8523 108.348 11.884 108.629 10.2867C108.977 8.31709 110.748 6.76123 113.429 6.76123C115.912 6.76123 116.739 8.06882 117.029 9.18606L115.034 9.86468Z" fill="#696767"/>
+<path d="M126.116 18.2977L130.014 6.99292H132.149L128.226 18.2977H126.116Z" fill="#696767"/>
+<path d="M124.908 9.93084C124.813 9.41691 124.473 8.97994 123.997 8.76394C123.672 8.6067 123.315 8.52477 122.955 8.52394C121.918 8.40891 120.943 9.06767 120.662 10.0715C120.538 10.7667 120.968 11.1557 121.97 11.4453C123.865 12.0081 124.279 12.1239 124.866 12.6784C125.417 13.2544 125.641 14.0704 125.462 14.8467C125.338 15.575 124.411 18.6453 120.199 18.6453C116.839 18.6453 116.384 16.5433 116.235 15.8315L118.229 15.1695C118.345 15.6743 118.635 16.9488 120.654 16.9488C122.475 16.9488 123.137 15.9143 123.286 15.2026C123.435 14.4908 122.913 14.1019 122.243 13.895L120.48 13.357C119.082 12.9184 118.213 11.9502 118.494 10.3529C118.842 8.38325 120.613 6.82739 123.302 6.82739C125.785 6.82739 126.613 8.13498 126.902 9.25222L124.908 9.93084Z" fill="#696767"/>
+<path d="M179.586 11.0068C179.586 10.2951 179.752 8.39165 177.724 8.39165C176.706 8.39165 175.904 8.87992 175.117 10.0468C174.374 11.2907 173.843 12.6504 173.545 14.0689C173.106 16.5516 174.646 16.833 175.25 16.833C176.715 16.833 177.857 15.4261 178.378 14.5158L179.926 15.211C178.643 17.313 176.971 18.5875 174.786 18.5875C172.105 18.5875 170.938 16.4854 171.476 13.622C172.064 10.262 174.604 6.70337 178.097 6.70337C180.728 6.70337 181.771 8.35854 181.548 10.6675L179.586 11.0068Z" fill="#696767"/>
+<path d="M139.465 9.93099C139.371 9.41706 139.03 8.98009 138.555 8.76409C138.229 8.60685 137.873 8.52492 137.512 8.52409C136.476 8.40906 135.5 9.06782 135.219 10.0717C135.095 10.7669 135.526 11.1558 136.527 11.4455C138.422 12.0082 138.836 12.1241 139.423 12.6786C139.994 13.2629 140.223 14.1037 140.028 14.8965C139.903 15.6248 138.977 18.6951 134.764 18.6951C131.404 18.6951 130.949 16.5931 130.8 15.8813L132.795 15.2193C132.91 15.7241 133.2 16.9986 135.219 16.9986C137.04 16.9986 137.702 15.9641 137.851 15.2524C138 14.5406 137.479 14.1517 136.808 13.9448L135.046 13.4069C133.647 12.9682 132.778 12 133.059 10.4027C133.407 8.43306 135.178 6.8772 137.868 6.8772C140.35 6.8772 141.178 8.18478 141.468 9.30202L139.465 9.93099Z" fill="#696767"/>
+<path d="M147.658 8.77223L144.356 18.2977H142.237L145.539 8.77223H142.626L143.239 6.99292H151.184L150.563 8.77223H147.658Z" fill="#696767"/>
+<path d="M155.884 13.9943V8.97085L152.64 13.9943H155.884ZM155.793 18.2977V15.5667H151.655L149.901 18.2977H147.956L155.404 6.99292H157.953L158.069 18.2977H155.793Z" fill="#696767"/>
+<path d="M166.246 18.2977L163.837 9.80671L160.899 18.2977H159.244L163.167 6.99292H165.286L167.479 14.7557L170.177 6.99292H171.807L167.901 18.2977H166.246Z" fill="#696767"/>
+<path d="M180.563 18.2977L184.486 6.99292H191.735L191.106 8.77223H185.909L184.891 11.7102H189.194L188.623 13.3819H184.32L183.236 16.5184H188.64L188.011 18.2977H180.563Z" fill="#696767"/>
+<path d="M22.1298 18.8358L21.9312 11.5696L25.4898 7.29102L27.8567 18.0248L22.1298 18.8358Z" fill="#FF1100"/>
+<path d="M31.2498 4.1543L32.1104 12.5295L32.4829 8.2343L31.2498 4.1543Z" fill="#FF1100"/>
+<path d="M32.1105 12.5295L27.8484 18.0577L28.6429 18.7943L35.3049 11.4453L32.1105 12.5295Z" fill="#FF1100"/>
+<path d="M33.7739 14.8384L34.2291 15.9143L36.9436 15.666L35.305 11.4453L33.7739 14.8384Z" fill="#FF1100"/>
+<path d="M22.0056 11.4619L13.887 18.5047L15.509 11.5943L22.0056 11.4619Z" fill="#FF1100"/>
+<path d="M33.1035 3.12819C25.8207 1.60543 19.2166 5.16405 19.2166 5.16405C27.9724 2.59025 31.2497 4.13784 31.2497 4.13784L33.1035 3.12819Z" fill="#FF1100"/>
+<path d="M10.4441 13.5557L8.08545 17.8012L13.8868 18.5046L10.4441 13.5557Z" fill="#FF1100"/>
+<mask id="mask0_46_1650" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="25" y="4" width="8" height="15">
+<path d="M31.2497 4.1626L32.1104 12.5295L27.8484 18.0578L25.4897 7.29915L31.2497 4.1626Z" fill="white"/>
+</mask>
+<g mask="url(#mask0_46_1650)">
+<path d="M25.5655 3.46428L24.0229 17.8979L32.038 18.7545L33.5805 4.32084L25.5655 3.46428Z" fill="#FF1100"/>
+</g>
+<mask id="mask1_46_1650" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="31" y="3" width="7" height="6">
+<path d="M32.4829 8.23438L37.5477 7.24955L37.7132 5.69369L33.0704 3.12817L31.2498 4.15438L32.4829 8.23438Z" fill="white"/>
+</mask>
+<g mask="url(#mask1_46_1650)">
+<path d="M35.2968 0.00198832L28.7815 5.0376L33.6703 11.363L40.1857 6.32741L35.2968 0.00198832Z" fill="#FF1100"/>
+</g>
+<mask id="mask2_46_1650" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="28" y="11" width="8" height="8">
+<path d="M35.3049 11.4453L28.6428 18.7943L33.7739 14.8384L35.3049 11.4453Z" fill="white"/>
+</mask>
+<g mask="url(#mask2_46_1650)">
+<path d="M29.322 9.42351L26.4033 18.0464L34.6186 20.8271L37.5373 12.2042L29.322 9.42351Z" fill="#FF1100"/>
+</g>
+<mask id="mask3_46_1650" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="32" y="15" width="5" height="5">
+<path d="M36.9434 15.666L34.2289 15.9143L32.6482 17.0067L32.8385 19.7377L36.9434 15.666Z" fill="white"/>
+</mask>
+<g mask="url(#mask3_46_1650)">
+<path d="M32.6526 15.4891L32.4822 19.7312L36.9393 19.9102L37.1097 15.6681L32.6526 15.4891Z" fill="#FF1100"/>
+</g>
+<mask id="mask4_46_1650" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="13" y="11" width="10" height="8">
+<path d="M22.0056 11.4619L13.887 18.5047L22.1297 18.8357L22.0056 11.4619Z" fill="white"/>
+</mask>
+<g mask="url(#mask4_46_1650)">
+<path d="M13.9832 10.5846L13.1108 18.7478L22.0311 19.7011L22.9035 11.5379L13.9832 10.5846Z" fill="#FF1100"/>
+</g>
+<mask id="mask5_46_1650" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="10" y="11" width="6" height="8">
+<path d="M10.4441 13.5559L13.8869 18.5048L15.5089 11.5945L10.4441 13.5559Z" fill="white"/>
+</mask>
+<g mask="url(#mask5_46_1650)">
+<path d="M10.7411 10.3995L8.80762 18.0969L15.2048 19.7038L17.1382 12.0063L10.7411 10.3995Z" fill="#FF1100"/>
+</g>
+<mask id="mask6_46_1650" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="5" y="17" width="9" height="5">
+<path d="M13.8869 18.5047L9.21108 21.2109L5.1228 18.6785L8.08556 17.8013L13.8869 18.5047Z" fill="white"/>
+</mask>
+<g mask="url(#mask6_46_1650)">
+<path d="M5.13736 17.4465L4.98657 21.2007L13.876 21.5577L14.0267 17.8035L5.13736 17.4465Z" fill="#FF1100"/>
+</g>
+<mask id="mask7_46_1650" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="5" y="18" width="5" height="4">
+<path d="M5.1228 18.6785L5.66073 20.6564L9.21108 21.2109L5.1228 18.6785Z" fill="white"/>
+</mask>
+<g mask="url(#mask7_46_1650)">
+<path d="M5.12732 18.5079L5.01904 21.2036L9.19499 21.3713L9.30326 18.6756L5.12732 18.5079Z" fill="#FF1100"/>
+</g>
+<mask id="mask8_46_1650" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="18" width="6" height="6">
+<path d="M5.12279 18.6785L0.173828 22.7833L1.6221 23.1061L5.66072 20.6564L5.12279 18.6785Z" fill="white"/>
+</mask>
+<g mask="url(#mask8_46_1650)">
+<path d="M0.201666 18.4496L0.015625 23.1006L5.67631 23.327L5.86236 18.676L0.201666 18.4496Z" fill="#FF1100"/>
+</g>
+      </svg>
+    </a>
+    <!-- Links -->
+    <div class="nav-links">
+      <a class="nav-link active" href="#">Intervencije</a>
+      <a class="nav-link" href="#">Pokazatelji</a>
+      <a class="nav-link" href="#">Servisni partneri</a>
+      <a class="nav-link" href="#">Zahtjevi</a>
+      <a class="nav-link" href="#">Korisnici</a>
+      <a class="nav-link" href="#">Financije</a>
+      <a class="nav-link" href="#">Import</a>
+    </div>
+  </div>
+  <button class="nav-user-btn" title="Profil">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#545252"/></svg>
+  </button>
+</nav>
+
+<!-- ══════════════════ DROPDOWN BACKDROP ══════════════════ -->
+<div class="overlay-back" id="ddBack"></div>
+
+<!-- ═════════════════════ DROPDOWN POPUP ═════════════════ -->
+<div class="dd-popup" id="ddPopup">
+  <div class="dd-head">
+    <span class="dd-label">Servisni Partneri</span>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="flex-shrink:0">
+      <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#888686"/>
+    </svg>
+    <input class="dd-search-in" id="ddSearchIn" type="text" placeholder="Pretraži">
+    <button class="dd-clear-btn" id="ddClearBtn">
+      <svg width="17" height="17" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#bfbdbd"/></svg>
+    </button>
+  </div>
+  <div class="dd-list" id="ddList"></div>
+</div>
+
+<!-- ════════════════════ CALENDAR POPUP ══════════════════ -->
+<div class="overlay-back" id="calBack"></div>
+<div class="cal-popup" id="calPopup">
+  <div class="cal-nav-row">
+    <div class="cal-nav-grp">
+      <button class="cal-btn" id="calPrevM">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="#403f3f"/></svg>
+      </button>
+      <select class="cal-sel" id="calMonthSel"></select>
+      <button class="cal-btn" id="calNextM">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="#403f3f"/></svg>
+      </button>
+    </div>
+    <div class="cal-nav-grp">
+      <button class="cal-btn" id="calPrevY">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="#403f3f"/></svg>
+      </button>
+      <select class="cal-sel" id="calYearSel"></select>
+      <button class="cal-btn" id="calNextY">
+        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="#403f3f"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="cal-grid" id="calGrid"></div>
+  <div class="cal-footer">
+    <button class="cal-cancel" id="calCancelBtn">Cancel</button>
+    <button class="cal-ok" id="calOkBtn">OK</button>
+  </div>
+</div>
+
+<!-- ══════════════════════ PAGE ══════════════════════════ -->
+<main class="page-content">
+  <h1 class="page-title">Intervencije</h1>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <div class="filter-left">
+      <!-- Search -->
+      <div class="field-wrap">
+        <span class="field-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#888686"/>
+          </svg>
+        </span>
+        <input class="field-base" id="searchInput" type="text" placeholder="Pretraži intervencije">
+        <span class="field-float">Pretraži intervencije</span>
+      </div>
+
+      <!-- Partner dropdown trigger -->
+      <div class="field-wrap">
+        <div class="field-base" id="partnerTrigger" tabindex="0" role="button">
+          <span id="partnerTriggerText" style="color:var(--grey-300)">Servisni Partneri</span>
+        </div>
+        <span class="field-float" id="partnerFloat">Servisni Partneri</span>
+        <span class="field-arrow" id="partnerArrow">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" fill="#696767"/></svg>
+        </span>
+      </div>
+
+      <!-- Date trigger -->
+      <div class="field-wrap">
+        <span class="field-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z" fill="#888686"/>
+          </svg>
+        </span>
+        <div class="field-base" id="dateTrigger" tabindex="0" role="button">
+          <span id="dateTriggerText" style="color:var(--grey-300)">Odabir datuma</span>
+        </div>
+        <span class="field-float" id="dateFloat">Odabir datuma</span>
+      </div>
+
+      <!-- Dohvati — inside left group per Figma layout -->
+      <button class="btn-primary" id="fetchBtn">Dohvati</button>
+
+      <!-- Poništi filter — appears when any filter has a value -->
+      <button class="btn-reset" id="resetBtn">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/>
+        </svg>
+        Poništi filter
+      </button>
+    </div>
+
+    <div class="filter-right">
+      <button class="btn-secondary" id="exportBtn">
+        <span class="export-label">Export tablice</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" fill="#1a82ae"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Table section -->
+  <div class="table-section">
+
+    <!-- Table (default state) -->
+    <div id="tableArea" class="table-scroll">
+      <table>
+        <thead>
+          <tr id="theadRow"></tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="pag-bar">
+        <span id="pagInfo">1–10 of 66</span>
+        <div class="pag-ctrl" id="pagCtrl"></div>
+      </div>
+    </div>
+
+    <!-- Loading state -->
+    <div class="state-box" id="loadingBox">
+      <div class="spinner"></div>
+      <span class="state-lbl">Dohvaćam podatke</span>
+    </div>
+
+    <!-- Empty state -->
+    <div class="state-box" id="emptyBox">
+      <svg width="88" height="88" viewBox="0 0 88 88" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Document -->
+        <rect x="12" y="8" width="46" height="58" rx="3" fill="#e8f7fc" stroke="#aae0f2" stroke-width="2"/>
+        <rect x="20" y="20" width="30" height="3" rx="1.5" fill="#7ecfec"/>
+        <rect x="20" y="28" width="30" height="3" rx="1.5" fill="#7ecfec"/>
+        <rect x="20" y="36" width="22" height="3" rx="1.5" fill="#7ecfec"/>
+        <!-- Magnifying glass -->
+        <circle cx="56" cy="58" r="18" fill="white" stroke="#aae0f2" stroke-width="2"/>
+        <circle cx="56" cy="58" r="12" fill="#ddf3fa" stroke="#37aada" stroke-width="2"/>
+        <!-- X mark inside -->
+        <line x1="51" y1="53" x2="61" y2="63" stroke="#e84031" stroke-width="2.5" stroke-linecap="round"/>
+        <line x1="61" y1="53" x2="51" y2="63" stroke="#e84031" stroke-width="2.5" stroke-linecap="round"/>
+        <!-- Handle -->
+        <line x1="69" y1="71" x2="78" y2="80" stroke="#37aada" stroke-width="3.5" stroke-linecap="round"/>
+      </svg>
+      <span class="state-lbl">Nema podataka</span>
+    </div>
+
+  </div><!-- /table-section -->
+</main>
+
+<!-- ═══════════════════ DETAIL PAGE ═══════════════════ -->
+<div id="detailPage">
+
+  <!-- Header -->
+  <div class="dp-header">
+    <button class="dp-back" id="dpBack">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z" fill="currentColor"/></svg>
+      Povratak
+    </button>
+    <div class="dp-title-row">
+      <h1 class="dp-title" id="dpTitle">Intervencija: M12344</h1>
+      <div class="dp-actions">
+        <button class="btn-chat-toggle" id="dpChatToggle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="currentColor"/></svg>
+          Komentari
+        </button>
+        <button class="btn-primary" style="display:flex;align-items:center;gap:8px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm2 16H5V5h11.17L19 7.83V19zm-7-7c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zM6 6h9v4H6z" fill="white"/></svg>
+          Spremi izmjene
+        </button>
+        <button class="btn-secondary" style="display:flex;align-items:center;gap:8px">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z" fill="#1a82ae"/></svg>
+          Ispis
+        </button>
+      </div>
+    </div>
+    <!-- Tabs -->
+    <div class="dp-tabs">
+      <button class="dp-tab active" data-panel="opce">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>
+        Općenito
+      </button>
+      <button class="dp-tab" data-panel="mobilno">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+        Mobilno jamstvo
+      </button>
+      <button class="dp-tab" data-panel="dodatne">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        Dodatne informacije
+      </button>
+      <button class="dp-tab" data-panel="dokumenti">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/></svg>
+        Dokumenti
+      </button>
+      <button class="dp-tab" data-panel="pozivi">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+        Pozivi
+      </button>
+      <button class="dp-tab" data-panel="zakljucak">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 3c1.93 0 3.5 1.57 3.5 3.5S13.93 13 12 13s-3.5-1.57-3.5-3.5S10.07 6 12 6zm7 13H5v-.23c0-.62.28-1.2.76-1.58C7.47 15.82 9.64 15 12 15s4.53.82 6.24 2.19c.48.38.76.97.76 1.58V19z"/></svg>
+        Zaključak
+      </button>
+    </div>
+  </div>
+
+  <!-- Body -->
+  <div class="dp-body">
+
+    <!-- Content panels -->
+    <div class="dp-content">
+
+      <!-- ── OPĆENITO ── -->
+      <div class="dp-panel active" id="panel-opce">
+        <div class="form-section">
+          <div class="ff-grid" style="margin-bottom:20px">
+            <div class="ff">
+              <span class="ff-label">Broj slučaja</span>
+              <div class="ff-val" id="dp-broj">12344</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Odabir datuma</span>
+              <div class="ff-val di">
+                <svg class="ff-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z" fill="#888686"/></svg>
+                <span id="dp-datum">15.04.2026.</span>
+              </div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Korisnik</span>
+              <div class="ff-val" id="dp-korisnik">Ivan Horvat</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Telefon</span>
+              <div class="ff-val" id="dp-tel">+385 99 1233 445</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Dojavljivač</span>
+              <div class="ff-val">Ivan Horvat</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Kontakt Dojavljivača</span>
+              <div class="ff-val">+385 99 1233 445</div>
+            </div>
+          </div>
+
+          <div class="form-section-title">Lokacija intervencije</div>
+          <div class="ff-grid" style="margin-bottom:20px">
+            <div class="ff">
+              <span class="ff-label">Oznaka države</span>
+              <div class="ff-val">RH</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Mjesto</span>
+              <div class="ff-val">Tisno</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Adresa</span>
+              <div class="ff-val">Trg Franje Tuđmana 2</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Opis lokacije</span>
+              <div class="ff-val">Ovo je moj opis</div>
+            </div>
+          </div>
+
+          <div class="form-section-title">Završna lokacija</div>
+          <div class="ff-grid" style="margin-bottom:20px">
+            <div class="ff">
+              <span class="ff-label">Oznaka države</span>
+              <div class="ff-val">RH</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Mjesto</span>
+              <div class="ff-val">Tisno</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Adresa</span>
+              <div class="ff-val">Trg Franje Tuđmana 2</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Opis lokacije</span>
+              <div class="ff-val">Ovo je moj opis</div>
+            </div>
+          </div>
+
+          <div class="form-section-title">Vozilo</div>
+          <div class="ff-grid">
+            <div class="ff">
+              <span class="ff-label">Broj šasije</span>
+              <div class="ff-val" id="dp-sasija">VW124532442123</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Marka vozila</span>
+              <div class="ff-val" id="dp-marka">Audi A3</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Tip vozila</span>
+              <div class="ff-val">osobni automobil</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Registracijski broj</span>
+              <div class="ff-val" id="dp-reg">ŠI12234HR</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Model</span>
+              <div class="ff-val">limuzina</div>
+            </div>
+            <div class="ff">
+              <span class="ff-label">Težina vozila</span>
+              <div class="ff-val">2021</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MOBILNO JAMSTVO ── -->
+      <div class="dp-panel" id="panel-mobilno">
+        <div class="cb-grid">
+          <div class="cb-row"><div class="cb-box"></div> Posjeduje mobilno jamstvo</div>
+          <div class="cb-row"><div class="cb-box checked"><svg width="12" height="12" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="white"/></svg></div> Klijent želi vuču vozila</div>
+          <div class="cb-row"><div class="cb-box checked"><svg width="12" height="12" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="white"/></svg></div> Klijent je mobilan</div>
+          <div class="cb-row"><div class="cb-box checked"><svg width="12" height="12" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="white"/></svg></div> Klijent želi savjetovanje</div>
+          <div class="cb-row"><div class="cb-box"></div> Slanje ino materijala</div>
+          <div class="cb-row"><div class="cb-box checked"><svg width="12" height="12" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="white"/></svg></div> Info procjena popravka vozila</div>
+          <div class="cb-row"><div class="cb-box"></div> Korištena HPST aplikacija</div>
+          <div class="cb-row"><div class="cb-box"></div> Slučaj riješen kroz HPST aplikaciju</div>
+          <div class="cb-row"><div class="cb-box"></div> Slanje pisma</div>
+        </div>
+        <div style="margin-top:28px;display:flex;flex-direction:column;gap:20px;max-width:640px">
+          <div class="ff">
+            <span class="ff-label">Zadnji servis</span>
+            <div class="ff-val">AH Automobili d.o.o. Podružnica Karlovac</div>
+          </div>
+          <div class="ff">
+            <span class="ff-label">Servisni partner preuzeo slučaj</span>
+            <div class="ff-val">AH Automobili d.o.o. Podružnica Karlovac</div>
+          </div>
+          <div class="ff">
+            <span class="ff-label">Email klijent</span>
+            <div class="ff-val">ivan.horvat@email.com</div>
+          </div>
+          <div class="ff">
+            <span class="ff-label">Planirani datum završetka popravka</span>
+            <div class="ff-val di">
+              <svg class="ff-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z" fill="#888686"/></svg>
+              21.3.2026.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DODATNE INFORMACIJE ── -->
+      <div class="dp-panel" id="panel-dodatne">
+        <div class="ff-grid" style="margin-bottom:20px;max-width:640px">
+          <div class="ff">
+            <span class="ff-label">Oznaka države</span>
+            <div class="ff-val">RH</div>
+          </div>
+          <div class="ff">
+            <span class="ff-label">Mjesto</span>
+            <div class="ff-val">Tisno</div>
+          </div>
+          <div class="ff">
+            <span class="ff-label">Adresa</span>
+            <div class="ff-val">Trg Franje Tuđmana 2</div>
+          </div>
+          <div class="ff">
+            <span class="ff-label">Opis lokacije</span>
+            <div class="ff-val">Ovo je moj opis</div>
+          </div>
+        </div>
+        <div class="map-placeholder">
+          <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=16.3,43.7,16.5,43.85&layer=mapnik" loading="lazy"></iframe>
+        </div>
+      </div>
+
+      <!-- ── DOKUMENTI ── -->
+      <div class="dp-panel" id="panel-dokumenti">
+        <div class="upload-zone">
+          <div class="upload-zone-title">Ubacite svoje datoteke ovdje</div>
+          <div class="upload-zone-sub">Podržani format je xlsx, a maksimalna veličina datoteke je 5 MB</div>
+          <button class="btn-primary" style="display:inline-flex;align-items:center;gap:8px;margin:0 auto">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z" fill="white"/></svg>
+            Prijenos datoteke
+          </button>
+        </div>
+        <div class="dp-table-section-title">Dokumenti</div>
+        <div class="dp-table-wrap">
+          <table class="dp-table">
+            <thead><tr>
+              <th>Naziv dokumenta</th>
+              <th>Korisnik</th>
+              <th>Datum unosa</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>Lorem_Ipsum.doc</td><td><div style="display:flex;align-items:center;gap:8px"><div class="chat-av" style="background:#cce9f5;color:#0d5475">JW</div>John Williams</div></td><td>15.04.2026.</td></tr>
+              <tr><td>Design_Notes.pdf</td><td><div style="display:flex;align-items:center;gap:8px"><div class="chat-av" style="background:#e0ded6;color:#3a3020">MS</div>Mary Smith</div></td><td>17.04.2026.</td></tr>
+              <tr><td>Project_Brief.docx</td><td><div style="display:flex;align-items:center;gap:8px"><div class="chat-av" style="background:#f5d4d0;color:#730b04">AB</div>Alice Brown</div></td><td>19.04.2026.</td></tr>
+              <tr><td>User_Research.xlsx</td><td><div style="display:flex;align-items:center;gap:8px"><div class="chat-av" style="background:#c8edd0;color:#085317">CK</div>Charlie King</div></td><td>21.04.2026.</td></tr>
+              <tr><td>Wireframe_Sketch.png</td><td><div style="display:flex;align-items:center;gap:8px"><div class="chat-av" style="background:#fce3c4;color:#7a4208">DT</div>Diana Turner</div></td><td>23.04.2026.</td></tr>
+              <tr><td>Style_Guide.ai</td><td><div style="display:flex;align-items:center;gap:8px"><div class="chat-av" style="background:#daf0c4;color:#3a5808">EP</div>Ethan Park</div></td><td>25.04.2026.</td></tr>
+              <tr><td>Feedback_Analysis.doc</td><td><div style="display:flex;align-items:center;gap:8px"><div class="chat-av" style="background:#f5cac8;color:#730b04">FG</div>Fiona Green</div></td><td>27.04.2026.</td></tr>
+              <tr><td>Prototype.mov</td><td><div style="display:flex;align-items:center;gap:8px"><div class="chat-av" style="background:#c4eeec;color:#085250">HJ</div>Henry Johnson</div></td><td>29.04.2026.</td></tr>
+              <tr><td>Presentation_Slides.pptx</td><td><div style="display:flex;align-items:center;gap:8px"><div class="chat-av" style="background:#d8dbf5;color:#1a2080">LM</div>Lisa Miller</div></td><td>01.05.2026.</td></tr>
+              <tr><td>Competitive_Analysis.pdf</td><td><div style="display:flex;align-items:center;gap:8px"><div class="chat-av" style="background:#e0d4f5;color:#3d1a80">QR</div>Quincy Roberts</div></td><td>03.05.2026.</td></tr>
+            </tbody>
+          </table>
+          <div class="pag-bar">
+            <span>1–10 of 66</span>
+            <div class="pag-ctrl">
+              <button class="pg-btn" disabled><svg width="14" height="14" viewBox="0 0 24 24"><path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z" fill="currentColor"/></svg></button>
+              <button class="pg-btn" disabled><svg width="14" height="14" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg></button>
+              <button class="pg-btn active">1</button>
+              <button class="pg-btn">2</button>
+              <button class="pg-btn">3</button>
+              <span class="pg-sep">…</span>
+              <button class="pg-btn">6</button>
+              <button class="pg-btn">7</button>
+              <button class="pg-btn"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg></button>
+              <button class="pg-btn"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z" fill="currentColor"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── POZIVI ── -->
+      <div class="dp-panel" id="panel-pozivi">
+        <div class="dp-table-wrap">
+          <table class="dp-table">
+            <thead><tr>
+              <th>Vrijeme poziva</th>
+              <th>Broj</th>
+              <th>Trajanje poziva</th>
+            </tr></thead>
+            <tbody>
+              <tr><td>15.04.2026.</td><td>+385 99 1712344</td><td>01:23</td></tr>
+              <tr><td>17.04.2026.</td><td>+385 99 1712345</td><td>02:45</td></tr>
+              <tr><td>19.04.2026.</td><td>+385 99 1712346</td><td>03:12</td></tr>
+              <tr><td>21.04.2026.</td><td>+385 99 1712347</td><td>04:36</td></tr>
+              <tr><td>23.04.2026.</td><td>+385 99 1712348</td><td>05:18</td></tr>
+              <tr><td>25.04.2026.</td><td>+385 99 1712349</td><td>06:50</td></tr>
+              <tr><td>27.04.2026.</td><td>+385 99 1712350</td><td>07:29</td></tr>
+              <tr><td>29.04.2026.</td><td>+385 99 1712351</td><td>08:00</td></tr>
+              <tr><td>01.05.2026.</td><td>+385 99 1712352</td><td>09:15</td></tr>
+              <tr><td>03.05.2026.</td><td>+385 99 1712353</td><td>10:42</td></tr>
+            </tbody>
+          </table>
+          <div class="pag-bar">
+            <span>1–10 of 66</span>
+            <div class="pag-ctrl">
+              <button class="pg-btn" disabled><svg width="14" height="14" viewBox="0 0 24 24"><path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z" fill="currentColor"/></svg></button>
+              <button class="pg-btn" disabled><svg width="14" height="14" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg></button>
+              <button class="pg-btn active">1</button>
+              <button class="pg-btn">2</button>
+              <button class="pg-btn">3</button>
+              <span class="pg-sep">…</span>
+              <button class="pg-btn">6</button>
+              <button class="pg-btn">7</button>
+              <button class="pg-btn"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg></button>
+              <button class="pg-btn"><svg width="14" height="14" viewBox="0 0 24 24"><path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z" fill="currentColor"/></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ZAKLJUČAK ── -->
+      <div class="dp-panel" id="panel-zakljucak">
+        <div class="ff-grid" style="margin-bottom:20px;max-width:640px">
+          <div class="ff">
+            <span class="ff-label">Datum zaključka</span>
+            <div class="ff-val di">
+              <svg class="ff-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z" fill="#888686"/></svg>
+              10.4.2024.
+            </div>
+          </div>
+          <div class="ff">
+            <span class="ff-label">Zadnja izmjena</span>
+            <div class="ff-val di">
+              <svg class="ff-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z" fill="#888686"/></svg>
+              10.4.2024.
+            </div>
+          </div>
+          <div class="ff">
+            <span class="ff-label">Težina vozila</span>
+            <div class="ff-val">2500kg</div>
+          </div>
+          <div class="ff">
+            <span class="ff-label">Broj šasije</span>
+            <div class="ff-val">WV2ZZZZ1923859099</div>
+          </div>
+        </div>
+        <div style="max-width:640px">
+          <div class="cb-row" style="border-bottom:1px solid var(--grey-50)">
+            <div class="cb-box"></div>
+            <span>Jeste li zadovoljni organizacijom slučaja od strane Alarm centrale?</span>
+          </div>
+          <div class="cb-row" style="border-bottom:none;margin-bottom:24px">
+            <div class="cb-box"></div>
+            <span>Usluga provedena</span>
+          </div>
+          <div class="ff" style="margin-bottom:8px">
+            <span class="ff-label">Napomena</span>
+            <textarea class="ff-textarea">Value</textarea>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /dp-content -->
+
+    <!-- Chat panel -->
+    <div class="dp-chat" id="dpChat">
+      <div class="dp-chat-head">
+        <div class="dp-chat-title">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" fill="#1a82ae"/></svg>
+          Komentari
+        </div>
+        <button class="dp-chat-close" id="dpChatClose">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/></svg>
+        </button>
+      </div>
+      <div class="dp-chat-msgs">
+        <span class="chat-badge">Ulasan</span>
+        <div class="chat-msg-group">
+          <div class="chat-msg-author">
+            <div class="chat-av">IH</div> Ivan Horvat
+          </div>
+          <div class="chat-bubble">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras venenatis euismod malesuada. Nullam ac erat ante. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</div>
+        </div>
+        <div class="chat-msg-group">
+          <div class="chat-msg-author">
+            <div class="chat-av">IH</div> Ivan Horvat
+          </div>
+          <div class="chat-bubble alt">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum vestibulum. Cras venenatis euismod malesuada. Nullam ac erat ante. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.</div>
+        </div>
+        <div class="chat-msg-group">
+          <div class="chat-msg-author">
+            <div class="chat-av">IH</div> Ivan Horvat
+          </div>
+        </div>
+      </div>
+      <div class="dp-chat-input">
+        <div class="chat-textarea-wrap">
+          <span class="chat-textarea-label">Unesite poruku</span>
+          <textarea class="chat-textarea" placeholder=""></textarea>
+        </div>
+        <button class="chat-send">
+          Pošalji
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" fill="white"/></svg>
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /dp-body -->
+</div><!-- /detailPage -->
+
+<script>
+/* ═══════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════ */
+const rows = [
+  { broj:'M12344', datum:'15.04.2026. 14:55', initials:'JW', name:'Tadia Vrkić',    sasija:'WV122355KJRGLF', tel:'+385 998212234', reg:'ST9234RH', partner:'Porsche Inter d.o.o', status:'U tijeku',  marka:'SKODA/OCTAVIA'  },
+  { broj:'M12345', datum:'15.04.2026. 14:55', initials:'AK', name:'Leonard Cohen',  sasija:'WV122356KJRGLG', tel:'+385 998212235', reg:'ST9234RH', partner:'Euro Daus d.d',        status:'Zatvoreno', marka:'TOYOTA/CAMRY'   },
+  { broj:'M12346', datum:'15.04.2026. 14:55', initials:'BT', name:'Rosa Parks',     sasija:'WV122357KJRGLH', tel:'+385 998212236', reg:'ST9234RH', partner:'AH Automobili d.o.o', status:'Zatvoreno', marka:'FORD/FOCUS'     },
+  { broj:'M12347', datum:'15.04.2026. 14:55', initials:'CN', name:'Albert Einstein',sasija:'WV122358KJRGLI', tel:'+385 998212237', reg:'ST9234RH', partner:'Porsche Inter d.o.o', status:'Stornirano',marka:'HONDA/CIVIC'    },
+  { broj:'M12348', datum:'15.04.2026. 14:55', initials:'DP', name:'Frida Kahlo',    sasija:'WV122359KJRGLJ', tel:'+385 998212238', reg:'ST9234RH', partner:'AH Automobili d.o.o', status:'U tijeku',  marka:'NISSAN/ALTIMA'  },
+  { broj:'M12349', datum:'15.04.2026. 14:55', initials:'EG', name:'Mahatma Gandhi', sasija:'WV122360KJRGLK', tel:'+385 998212239', reg:'ST9234RH', partner:'Porsche Inter d.o.o', status:'Zatvoreno', marka:'BMW/3 SERIES'   },
+  { broj:'M12350', datum:'15.04.2026. 14:55', initials:'FR', name:'Nelson Mandela', sasija:'WV122361KJRGLM', tel:'+385 998212240', reg:'ST9234RH', partner:'Porsche Inter d.o.o', status:'U tijeku',  marka:'AUDI/A3'        },
+  { broj:'M12351', datum:'15.04.2026. 14:55', initials:'GS', name:'Marie Curie',    sasija:'WV122362KJRGLN', tel:'+385 998212241', reg:'ST9234RH', partner:'Euro Daus d.d',        status:'Zatvoreno', marka:'AUDI/A4'        },
+  { broj:'M12352', datum:'15.04.2026. 14:55', initials:'HT', name:'Steve Jobs',     sasija:'WV122363KJRGLO', tel:'+385 998212242', reg:'ST9234RH', partner:'AH Automobili d.o.o', status:'U tijeku',  marka:'HYUNDAI/SONATA' },
+  { broj:'M12353', datum:'15.04.2026. 14:55', initials:'IP', name:'Virginia Woolf', sasija:'WV122364KJRGLP', tel:'+385 998212243', reg:'ST9234RH', partner:'Euro Daus d.d',        status:'Zatvoreno', marka:'KIA/OPTIMA'     },
+];
+
+const partners = [
+  { id:1, label:'Svi partneri',          checked:false },
+  { id:2, label:'Ultra Auto d.o.o',      checked:true  },
+  { id:3, label:'Tech Solutions Inc.',   checked:true  },
+  { id:4, label:'Green Energy Ltd.',     checked:false },
+  { id:5, label:'Culinary Creations C.', checked:true  },
+  { id:6, label:'Wellness Group LLC',    checked:true  },
+  { id:7, label:'InnovaTech Services',   checked:false },
+];
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+/* ═══════════════════════════════════════════════
+   COLUMN DEFINITIONS
+═══════════════════════════════════════════════ */
+let columns = [
+  { key:'broj',    label:'BROJ',             field:'broj',    width:96  },
+  { key:'datum',   label:'DATUM I VRIJEME',  field:'datum',   width:156 },
+  { key:'kontakt', label:'KONTAKT',          field:'name',    width:163 },
+  { key:'sasija',  label:'BROJ ŠASIJE',      field:'sasija',  width:186 },
+  { key:'tel',     label:'TELEFON',          field:'tel',     width:171 },
+  { key:'reg',     label:'REGISTRACIJA',     field:'reg',     width:157 },
+  { key:'partner', label:'SERVISNI PARTNER', field:'partner', width:169 },
+  { key:'status',  label:'STATUS',           field:'status',  width:132 },
+  { key:'marka',   label:'MARKA',            field:'marka',   width:140 },
+];
+
+/* ═══ SVG ICONS ═══ */
+const ICON_DRAG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="display:block;flex-shrink:0"><path d="M11 18c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-2-8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0-6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6 4c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>`;
+const ICON_ARROW = `<svg class="sort-arrow" width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/></svg>`;
+
+/* ═══════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════ */
+let calState    = { year: 2025, month: 7, selected: null };
+let dateValue   = null;
+let filtersActive = false;
+let sortState   = { key: null, dir: 'asc' };
+let currentData = [...rows];
+
+/* ═══════════════════════════════════════════════
+   SORT
+═══════════════════════════════════════════════ */
+function parseDatum(s) {
+  const parts = s.split(' ');
+  const dp = parts[0].split('.').filter(x => x);
+  const tp = (parts[1] || '0:0').split(':');
+  return new Date(+dp[2], +dp[1]-1, +dp[0], +tp[0], +tp[1]);
+}
+
+function sortData(data, colKey, dir) {
+  const col = columns.find(c => c.key === colKey);
+  if (!col) return data;
+  return [...data].sort((a, b) => {
+    let va = a[col.field], vb = b[col.field];
+    if (colKey === 'datum') {
+      va = parseDatum(va); vb = parseDatum(vb);
+      return dir === 'asc' ? va - vb : vb - va;
+    }
+    if (colKey === 'broj') {
+      va = parseInt(String(va).replace(/\D/g,'')); vb = parseInt(String(vb).replace(/\D/g,''));
+      return dir === 'asc' ? va - vb : vb - va;
+    }
+    va = String(va).toLowerCase(); vb = String(vb).toLowerCase();
+    return dir === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+}
+
+function sortByCol(key) {
+  if (sortState.key === key) {
+    sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortState.key = key; sortState.dir = 'asc';
+  }
+  currentData = sortData(currentData, sortState.key, sortState.dir);
+  renderTableBody(currentData);
+  updateSortArrows();
+}
+
+function updateSortArrows() {
+  document.querySelectorAll('#theadRow .sort-grp').forEach(grp => {
+    const arrow = grp.querySelector('.sort-arrow');
+    if (!arrow) return;
+    const key = grp.dataset.col;
+    if (key === sortState.key) {
+      grp.classList.add('active');
+      arrow.style.transform = sortState.dir === 'asc' ? 'rotate(180deg)' : 'rotate(0deg)';
+    } else {
+      grp.classList.remove('active');
+      arrow.style.transform = '';
+    }
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER HEADER
+═══════════════════════════════════════════════ */
+function renderHeader() {
+  const tr = document.getElementById('theadRow');
+  tr.innerHTML = columns.map((col, idx) => `
+    <th data-col="${col.key}" data-idx="${idx}" style="width:${col.width}px;min-width:60px" draggable="true">
+      <div class="th-inner">
+        <span class="th-label">${col.label}</span>
+        <span class="sort-grp" data-col="${col.key}" onclick="sortByCol('${col.key}')">
+          ${ICON_DRAG}${ICON_ARROW}
+        </span>
+      </div>
+      <div class="col-resize-handle"></div>
+    </th>
+  `).join('');
+  updateSortArrows();
+  attachColDragHandlers();
+  attachResizeHandlers();
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER BODY
+═══════════════════════════════════════════════ */
+function badgeClass(s) {
+  if (s === 'U tijeku')   return 'b-blue';
+  if (s === 'Zatvoreno')  return 'b-grey';
+  if (s === 'Stornirano') return 'b-red';
+  return 'b-grey';
+}
+
+function cellHtml(col, r) {
+  switch (col.key) {
+    case 'kontakt':
+      return `<div class="contact-cell"><div class="avatar">${r.initials}</div><span class="avatar-name">${r.name}</span></div>`;
+    case 'status':
+      return `<span class="badge ${badgeClass(r.status)}">${r.status}</span>`;
+    default:
+      return r[col.field] != null ? String(r[col.field]) : '';
+  }
+}
+
+function renderTableBody(data) {
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = data.map((r, i) =>
+    `<tr data-row-idx="${i}" style="cursor:pointer">${columns.map(col =>
+      `<td class="${col.key==='broj'?'td-num':col.key==='datum'?'td-date':''}">${cellHtml(col,r)}</td>`
+    ).join('')}</tr>`
+  ).join('');
+  tbody.querySelectorAll('tr').forEach(tr => {
+    tr.addEventListener('click', () => {
+      const idx = +tr.dataset.rowIdx;
+      if (!isNaN(idx) && data[idx]) openDetail(data[idx]);
+    });
+  });
+}
+
+function renderTable(data) { currentData = data; renderTableBody(data); }
+
+/* ═══════════════════════════════════════════════
+   COLUMN DRAG TO REORDER
+═══════════════════════════════════════════════ */
+let dragSrcIdx = null;
+
+function attachColDragHandlers() {
+  document.querySelectorAll('#theadRow th').forEach((th, idx) => {
+    th.addEventListener('dragstart', e => {
+      if (e.target.closest && (e.target.closest('.sort-grp') || e.target.closest('.col-resize-handle'))) {
+        e.preventDefault(); return;
+      }
+      dragSrcIdx = idx;
+      th.classList.add('col-dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', String(idx));
+    });
+    th.addEventListener('dragend', () => {
+      th.classList.remove('col-dragging');
+      document.querySelectorAll('#theadRow th').forEach(t => t.classList.remove('col-drag-over'));
+    });
+    th.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('#theadRow th').forEach(t => t.classList.remove('col-drag-over'));
+      th.classList.add('col-drag-over');
+    });
+    th.addEventListener('dragleave', e => {
+      if (!th.contains(e.relatedTarget)) th.classList.remove('col-drag-over');
+    });
+    th.addEventListener('drop', e => {
+      e.preventDefault();
+      const dropIdx = idx;
+      if (dragSrcIdx === null || dragSrcIdx === dropIdx) return;
+      const moved = columns.splice(dragSrcIdx, 1)[0];
+      columns.splice(dropIdx, 0, moved);
+      dragSrcIdx = null;
+      renderHeader();
+      renderTableBody(currentData);
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   COLUMN RESIZE
+═══════════════════════════════════════════════ */
+function attachResizeHandlers() {
+  document.querySelectorAll('#theadRow .col-resize-handle').forEach(handle => {
+    let startX, startW, th;
+    handle.addEventListener('mousedown', e => {
+      e.stopPropagation(); e.preventDefault();
+      th = handle.closest('th');
+      startX = e.clientX;
+      startW = th.offsetWidth;
+      handle.classList.add('resizing');
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      function onMove(e) {
+        const w = Math.max(60, startW + e.clientX - startX);
+        th.style.width = w + 'px';
+        const col = columns.find(c => c.key === th.dataset.col);
+        if (col) col.width = w;
+      }
+      function onUp() {
+        handle.classList.remove('resizing');
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+        document.removeEventListener('mousemove', onMove);
+        document.removeEventListener('mouseup', onUp);
+      }
+      document.addEventListener('mousemove', onMove);
+      document.addEventListener('mouseup', onUp);
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   PAGINATION
+═══════════════════════════════════════════════ */
+function renderPagination(current=1, total=7) {
+  const ctrl = document.getElementById('pagCtrl');
+  const pages = [1,2,3,'…',6,7];
+  ctrl.innerHTML = `
+    <button class="pg-btn" ${current===1?'disabled':''} onclick="goPage(1)">
+      <svg width="14" height="14" viewBox="0 0 24 24"><path d="M18.41 16.59L13.82 12l4.59-4.59L17 6l-6 6 6 6zM6 6h2v12H6z" fill="currentColor"/></svg>
+    </button>
+    <button class="pg-btn" ${current===1?'disabled':''} onclick="goPage(${current-1})">
+      <svg width="14" height="14" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg>
+    </button>
+    ${pages.map(p => p === '…'
+      ? `<span class="pg-sep">…</span>`
+      : `<button class="pg-btn ${p===current?'active':''}" onclick="goPage(${p})">${p}</button>`
+    ).join('')}
+    <button class="pg-btn" ${current===total?'disabled':''} onclick="goPage(${current+1})">
+      <svg width="14" height="14" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>
+    </button>
+    <button class="pg-btn" ${current===total?'disabled':''} onclick="goPage(${total})">
+      <svg width="14" height="14" viewBox="0 0 24 24"><path d="M5.59 7.41L10.18 12l-4.59 4.59L7 18l6-6-6-6zM16 6h2v12h-2z" fill="currentColor"/></svg>
+    </button>
+  `;
+}
+
+function goPage(p) {
+  const total = 7;
+  if (p < 1 || p > total) return;
+  document.getElementById('pagInfo').textContent = `${(p-1)*10+1}–${Math.min(p*10,66)} of 66`;
+  renderPagination(p, total);
+}
+
+/* ═══════════════════════════════════════════════
+   SHOW / HIDE STATES
+═══════════════════════════════════════════════ */
+function showTable()   {
+  document.getElementById('tableArea').style.display = 'block';
+  document.getElementById('loadingBox').classList.remove('vis');
+  document.getElementById('emptyBox').classList.remove('vis');
+}
+function showLoading() {
+  document.getElementById('tableArea').style.display = 'none';
+  document.getElementById('loadingBox').classList.add('vis');
+  document.getElementById('emptyBox').classList.remove('vis');
+}
+function showEmpty()   {
+  document.getElementById('tableArea').style.display = 'none';
+  document.getElementById('loadingBox').classList.remove('vis');
+  document.getElementById('emptyBox').classList.add('vis');
+}
+
+/* ═══════════════════════════════════════════════
+   DROPDOWN
+═══════════════════════════════════════════════ */
+const ddPopup = document.getElementById('ddPopup');
+const ddBack  = document.getElementById('ddBack');
+const partnerTrigger = document.getElementById('partnerTrigger');
+
+function renderDropdownItems(filter='') {
+  const list = document.getElementById('ddList');
+  const filtered = partners.filter(p => p.label.toLowerCase().includes(filter.toLowerCase()));
+  list.innerHTML = filtered.map(p => `
+    <div class="dd-item" onclick="togglePartner(${p.id})">
+      <div class="chk ${p.checked?'on':''}">
+        ${p.checked ? `<svg width="12" height="12" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="white"/></svg>` : ''}
+      </div>
+      ${p.label}
+    </div>
+  `).join('');
+}
+
+function togglePartner(id) {
+  const p = partners.find(x => x.id === id);
+  if (!p) return;
+  p.checked = !p.checked;
+  renderDropdownItems(document.getElementById('ddSearchIn').value);
+  updatePartnerTrigger();
+  updateResetVisibility();
+}
+
+function updatePartnerTrigger() {
+  const checked = partners.filter(p => p.checked && p.id !== 1);
+  const txt = document.getElementById('partnerTriggerText');
+  const flt = document.getElementById('partnerFloat');
+  if (checked.length === 0) {
+    txt.textContent = 'Servisni Partneri';
+    txt.style.color = 'var(--grey-300)';
+    partnerTrigger.classList.remove('has-value');
+    flt.style.display = 'none';
+  } else if (checked.length === partners.length - 1) {
+    txt.textContent = 'Svi Partneri';
+    txt.style.color = 'var(--grey-800)';
+    partnerTrigger.classList.add('has-value');
+    flt.style.display = 'block';
+  } else {
+    txt.textContent = checked.map(p => p.label).join(', ');
+    txt.style.color = 'var(--grey-800)';
+    partnerTrigger.classList.add('has-value');
+    flt.style.display = 'block';
+  }
+}
+
+function openDropdown() {
+  const rect = partnerTrigger.getBoundingClientRect();
+  ddPopup.style.top  = (rect.bottom + 4) + 'px';
+  ddPopup.style.left = rect.left + 'px';
+  ddPopup.classList.add('open');
+  ddBack.classList.add('open');
+  partnerTrigger.classList.add('open');
+  document.getElementById('partnerArrow').querySelector('svg').style.transform = 'rotate(180deg)';
+  renderDropdownItems();
+  document.getElementById('ddSearchIn').focus();
+}
+
+function closeDropdown() {
+  ddPopup.classList.remove('open');
+  ddBack.classList.remove('open');
+  partnerTrigger.classList.remove('open');
+  document.getElementById('partnerArrow').querySelector('svg').style.transform = '';
+}
+
+partnerTrigger.addEventListener('click', () => {
+  ddPopup.classList.contains('open') ? closeDropdown() : openDropdown();
+});
+ddBack.addEventListener('click', closeDropdown);
+
+document.getElementById('ddSearchIn').addEventListener('input', e => {
+  renderDropdownItems(e.target.value);
+});
+document.getElementById('ddClearBtn').addEventListener('click', () => {
+  document.getElementById('ddSearchIn').value = '';
+  renderDropdownItems();
+});
+
+/* ═══════════════════════════════════════════════
+   CALENDAR
+═══════════════════════════════════════════════ */
+const calPopup = document.getElementById('calPopup');
+const calBack  = document.getElementById('calBack');
+const dateTrigger = document.getElementById('dateTrigger');
+
+function renderCalendar() {
+  const { year, month, selected } = calState;
+  const today = new Date();
+
+  // Month select
+  const mSel = document.getElementById('calMonthSel');
+  mSel.innerHTML = MONTHS.map((m,i) => `<option value="${i}" ${i===month?'selected':''}>${m}</option>`).join('');
+
+  // Year select
+  const ySel = document.getElementById('calYearSel');
+  ySel.innerHTML = '';
+  for (let y = 2020; y <= 2030; y++) {
+    ySel.innerHTML += `<option value="${y}" ${y===year?'selected':''}>${y}</option>`;
+  }
+
+  // Days
+  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const daysInPrev  = new Date(year, month, 0).getDate();
+
+  const grid = document.getElementById('calGrid');
+  const dayNames = ['S','M','T','W','T','F','S'];
+  grid.innerHTML = dayNames.map(d => `<div class="cal-dname">${d}</div>`).join('');
+
+  // Previous month tail
+  for (let i = firstDay - 1; i >= 0; i--) {
+    grid.innerHTML += `<div class="cal-day other">${daysInPrev - i}</div>`;
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===d;
+    const isSel   = selected && selected.year===year && selected.month===month && selected.day===d;
+    grid.innerHTML += `<div class="cal-day ${isToday?'today':''} ${isSel?'sel':''}" onclick="selectDay(${d})">${d}</div>`;
+  }
+
+  // Next month fill
+  const totalCells = firstDay + daysInMonth;
+  const remaining  = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let d = 1; d <= remaining; d++) {
+    grid.innerHTML += `<div class="cal-day other">${d}</div>`;
+  }
+}
+
+function selectDay(d) {
+  calState.selected = { year: calState.year, month: calState.month, day: d };
+  renderCalendar();
+}
+
+function openCalendar() {
+  const rect = dateTrigger.getBoundingClientRect();
+  calPopup.style.top  = (rect.bottom + 4) + 'px';
+  calPopup.style.left = rect.left + 'px';
+  calPopup.classList.add('open');
+  calBack.classList.add('open');
+  dateTrigger.classList.add('open');
+  renderCalendar();
+}
+
+function closeCalendar(save) {
+  calPopup.classList.remove('open');
+  calBack.classList.remove('open');
+  dateTrigger.classList.remove('open');
+  if (save && calState.selected) {
+    const { year, month, day } = calState.selected;
+    const label = `${day}.${month+1}.${year}.`;
+    dateValue = label;
+    const txt = document.getElementById('dateTriggerText');
+    const flt = document.getElementById('dateFloat');
+    txt.textContent = label;
+    txt.style.color = 'var(--grey-800)';
+    dateTrigger.classList.add('has-value');
+    flt.style.display = 'block';
+    updateResetVisibility();
+  }
+}
+
+dateTrigger.addEventListener('click', () => {
+  calPopup.classList.contains('open') ? closeCalendar(false) : openCalendar();
+});
+calBack.addEventListener('click', () => closeCalendar(false));
+document.getElementById('calCancelBtn').addEventListener('click', () => closeCalendar(false));
+document.getElementById('calOkBtn').addEventListener('click', () => closeCalendar(true));
+
+document.getElementById('calMonthSel').addEventListener('change', e => {
+  calState.month = +e.target.value; renderCalendar();
+});
+document.getElementById('calYearSel').addEventListener('change', e => {
+  calState.year = +e.target.value; renderCalendar();
+});
+document.getElementById('calPrevM').addEventListener('click', () => {
+  if (calState.month === 0) { calState.month=11; calState.year--; } else calState.month--;
+  renderCalendar();
+});
+document.getElementById('calNextM').addEventListener('click', () => {
+  if (calState.month === 11) { calState.month=0; calState.year++; } else calState.month++;
+  renderCalendar();
+});
+document.getElementById('calPrevY').addEventListener('click', () => { calState.year--; renderCalendar(); });
+document.getElementById('calNextY').addEventListener('click', () => { calState.year++; renderCalendar(); });
+
+/* ═══════════════════════════════════════════════
+   RESET VISIBILITY — reactive, based on any filter value
+═══════════════════════════════════════════════ */
+const searchInput = document.getElementById('searchInput');
+
+function updateResetVisibility() {
+  const hasSearch  = !!searchInput.value.trim();
+  const hasPartner = partners.some(p => p.checked);
+  const hasDate    = !!dateValue;
+  document.getElementById('resetBtn').classList.toggle('visible', hasSearch || hasPartner || hasDate);
+}
+
+/* ═══════════════════════════════════════════════
+   SEARCH input — float label
+═══════════════════════════════════════════════ */
+searchInput.addEventListener('input', () => {
+  searchInput.classList.toggle('has-value', !!searchInput.value);
+  updateResetVisibility();
+});
+
+/* ═══════════════════════════════════════════════
+   DOHVATI
+═══════════════════════════════════════════════ */
+document.getElementById('fetchBtn').addEventListener('click', () => {
+  const search  = searchInput.value.trim();
+  const isEmpty = search.toLowerCase().includes('nema') || search.toLowerCase().includes('zzz');
+  showLoading();
+  setTimeout(() => {
+    if (isEmpty) { showEmpty(); }
+    else { showTable(); }
+  }, 1400);
+});
+
+/* ═══════════════════════════════════════════════
+   PONIŠTI FILTER
+═══════════════════════════════════════════════ */
+document.getElementById('resetBtn').addEventListener('click', () => {
+  searchInput.value = ''; searchInput.classList.remove('has-value');
+  partners.forEach(p => p.checked = false); updatePartnerTrigger();
+  dateValue = null; calState.selected = null;
+  document.getElementById('dateTriggerText').textContent = 'Odabir datuma';
+  document.getElementById('dateTriggerText').style.color = 'var(--grey-300)';
+  dateTrigger.classList.remove('has-value');
+  document.getElementById('dateFloat').style.display = 'none';
+  filtersActive = false;
+  currentData = [...rows]; sortState = { key: null, dir: 'asc' };
+  renderHeader(); renderTableBody(currentData);
+  updateResetVisibility();
+  showTable();
+});
+
+/* ═══════════════════════════════════════════════
+   DETAIL PAGE
+═══════════════════════════════════════════════ */
+const detailPage = document.getElementById('detailPage');
+const dpBack     = document.getElementById('dpBack');
+const dpChat     = document.getElementById('dpChat');
+const dpChatClose   = document.getElementById('dpChatClose');
+const dpChatToggle  = document.getElementById('dpChatToggle');
+
+function openDetail(row) {
+  // Populate dynamic fields from row data
+  document.getElementById('dpTitle').textContent   = 'Intervencija: ' + row.broj;
+  document.getElementById('dp-broj').textContent   = row.broj.replace('M','');
+  document.getElementById('dp-datum').textContent  = row.datum.split(' ')[0];
+  document.getElementById('dp-korisnik').textContent = row.name;
+  document.getElementById('dp-tel').textContent    = row.tel;
+  document.getElementById('dp-sasija').textContent = row.sasija;
+  document.getElementById('dp-marka').textContent  = row.marka;
+  document.getElementById('dp-reg').textContent    = row.reg;
+
+  // Reset to first tab
+  switchTab('opce');
+
+  // Show
+  detailPage.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDetail() {
+  detailPage.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+dpBack.addEventListener('click', closeDetail);
+
+// Tab switching
+function switchTab(name) {
+  document.querySelectorAll('.dp-tab').forEach(t => t.classList.toggle('active', t.dataset.panel === name));
+  document.querySelectorAll('.dp-panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + name));
+}
+document.querySelectorAll('.dp-tab').forEach(tab => {
+  tab.addEventListener('click', () => switchTab(tab.dataset.panel));
+});
+
+// Chat toggle
+dpChatClose.addEventListener('click', () => {
+  dpChat.classList.add('collapsed');
+});
+dpChatToggle.addEventListener('click', () => {
+  dpChat.classList.toggle('collapsed');
+});
+
+// Row click → open detail
+function openDetailFromRow(e) {
+  const tr = e.currentTarget;
+  const idx = +tr.dataset.rowIdx;
+  if (!isNaN(idx) && currentData[idx]) openDetail(currentData[idx]);
+}
+
+/* ═══════════════════════════════════════════════
+   INIT
+═══════════════════════════════════════════════ */
+renderHeader();
+renderTableBody(currentData);
+renderPagination(1, 7);
+</script>
+</body>
+</html>
