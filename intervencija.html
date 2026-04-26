@@ -885,7 +885,7 @@
       // parse existing date or default to today
       const existing = activeTarget ? parseHR(activeTarget.textContent) : null;
       const ref = existing || new Date();
-      selDate  = existing;
+      selDate  = existing || new Date();
       curYear  = ref.getFullYear();
       curMonth = ref.getMonth();
       renderGrid();
