@@ -205,18 +205,18 @@
     .dpp-popup {
       display: none; position: fixed; z-index: 491;
       width: 360px; background: #fff;
-      border: 1px solid var(--grey-50); border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.13), 0 2px 6px rgba(0,0,0,.06);
-      font-family: 'Inter', sans-serif; overflow: visible;
+      border: 1px solid var(--grey-50); border-radius: 16px;
+      box-shadow: 0 4px 4px rgba(0,0,0,.25);
+      font-family: 'Inter', sans-serif; overflow: hidden;
     }
     .dpp-popup.open { display: block; }
 
     /* Header */
-    .dpp-header { display: flex; align-items: center; padding: 16px 14px 10px; }
-    .dpp-month-wrap { display: flex; align-items: center; flex: 1; position: relative; }
+    .dpp-header { display: flex; align-items: center; justify-content: space-between; height: 64px; padding: 0 4px; }
+    .dpp-month-wrap { display: flex; align-items: center; position: relative; }
     .dpp-year-wrap  { display: flex; align-items: center; }
     .dpp-nav {
-      width: 32px; height: 32px; border: none; background: none; cursor: pointer;
+      width: 48px; height: 48px; border: none; background: none; cursor: pointer;
       display: flex; align-items: center; justify-content: center; flex-shrink: 0;
       border-radius: 50%; color: var(--grey-500); transition: background .1s;
     }
@@ -224,48 +224,31 @@
     .dpp-mon-btn, .dpp-yr-btn {
       border: none; background: none; cursor: pointer;
       font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
-      color: var(--grey-800); display: flex; align-items: center; gap: 4px;
-      padding: 5px 7px; border-radius: 4px; transition: background .1s, color .1s;
+      color: var(--grey-800); display: flex; align-items: center; gap: 8px;
+      padding: 10px 4px 10px 8px; border-radius: 100px; transition: background .1s;
       white-space: nowrap;
     }
     .dpp-mon-btn:hover, .dpp-yr-btn:hover { background: var(--bg-table); }
     .dpp-mon-btn.open { background: var(--bg-dropdown); color: var(--blue-500); }
 
-    /* Mode toggle (Dan / Raspon datuma) */
-    .dpp-mode-toggle {
-      display: flex; margin: 0 14px 8px; border-radius: 6px;
-      background: var(--bg-table); padding: 3px;
-    }
-    .dpp-mode-btn {
-      flex: 1; border: none; background: none; cursor: pointer;
-      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
-      color: var(--grey-500); padding: 5px 8px; border-radius: 4px;
-      transition: background .1s, color .1s;
-    }
-    .dpp-mode-btn.active {
-      background: #fff; color: var(--grey-800); font-weight: 600;
-      box-shadow: 0 1px 3px rgba(0,0,0,.12);
-    }
-
     /* Weekday labels */
-    .dpp-weekdays { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 14px 2px; }
+    .dpp-weekdays { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 12px; }
     .dpp-wd {
-      height: 32px; display: flex; align-items: center; justify-content: center;
-      font-size: 11px; font-weight: 700; color: var(--grey-300); letter-spacing: .4px;
+      height: 48px; display: flex; align-items: center; justify-content: center;
+      font-size: 16px; font-weight: 600; color: var(--grey-800);
     }
 
     /* Day grid */
-    .dpp-days { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 14px 4px; }
+    .dpp-days { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 12px 4px; }
     .dpp-d {
-      height: 38px; display: flex; align-items: center; justify-content: center;
-      cursor: pointer; font-size: 14px; color: var(--grey-700);
-      position: relative; overflow: hidden;
+      height: 48px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 16px; color: var(--grey-800); position: relative;
     }
-    .dpp-out { color: var(--grey-100); cursor: default; pointer-events: none; }
+    .dpp-out { color: var(--grey-400); opacity: .38; cursor: default; pointer-events: none; }
 
-    /* Inner circle */
+    /* Inner circle (40px, matching Figma) */
     .dpp-dn {
-      width: 34px; height: 34px; border-radius: 50%;
+      width: 40px; height: 40px; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       position: relative; z-index: 1; flex-shrink: 0;
       transition: background .1s, border-color .1s;
@@ -274,43 +257,40 @@
       background: var(--bg-table);
     }
 
-    /* Range strip via ::before */
-    .dpp-d::before {
-      content: ''; position: absolute; top: 50%; transform: translateY(-50%);
-      height: 34px; background: var(--bg-dropdown); z-index: 0;
-      left: 0; right: 0; display: none;
-    }
-    .dpp-range-s::before { display: block; left: 50%; right: 0; }
-    .dpp-range-e::before { display: block; left: 0; right: 50%; }
-    .dpp-range-m::before { display: block; left: 0; right: 0; }
+    /* Range: full-cell background gradient strip (matching Figma) */
+    .dpp-range-m { background: var(--bg-dropdown); }
+    .dpp-range-s  { background: linear-gradient(to right, transparent 50%, var(--bg-dropdown) 50%); }
+    .dpp-range-e  { background: linear-gradient(to left,  transparent 50%, var(--bg-dropdown) 50%); }
 
-    /* Range endpoint circles */
+    /* Range endpoint filled circles */
     .dpp-range-s > .dpp-dn, .dpp-range-e > .dpp-dn {
       background: var(--blue-500); color: #fff; font-weight: 600;
     }
 
-    /* Today */
-    .dpp-today > .dpp-dn { border: 2px solid var(--blue-500); color: var(--blue-500); font-weight: 600; }
-    /* Selected single */
-    .dpp-sel > .dpp-dn { background: var(--blue-500) !important; color: #fff !important; font-weight: 600; }
-    .dpp-sel:hover > .dpp-dn { background: var(--blue-600) !important; }
+    /* Today: light blue outline (Figma: border blue-100, text blue-600) */
+    .dpp-today > .dpp-dn {
+      border: 1px solid var(--blue-100); color: var(--blue-600); background: #fff;
+    }
+    /* Single selected (range start before end is picked) */
+    .dpp-sel > .dpp-dn { background: var(--blue-500); color: #fff; font-weight: 600; }
 
     /* Footer */
     .dpp-footer {
       display: flex; align-items: center; justify-content: flex-end; gap: 4px;
-      padding: 10px 16px 14px; border-top: 1px solid var(--grey-50);
+      padding: 4px 12px 12px; border-top: 1px solid var(--grey-50);
     }
     .dpp-cancel-btn, .dpp-ok-btn {
       border: none; background: none; cursor: pointer;
       font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
-      color: var(--blue-500); padding: 8px 14px; border-radius: 4px;
-      transition: background .1s;
+      padding: 10px 16px; border-radius: 100px; transition: background .1s;
     }
+    .dpp-cancel-btn { color: var(--blue-600); }
+    .dpp-ok-btn     { color: var(--blue-500); }
     .dpp-cancel-btn:hover, .dpp-ok-btn:hover { background: var(--bg-dropdown); }
 
     /* Month dropdown list */
     .dpp-mon-list {
-      position: absolute; top: 36px; left: 32px;
+      position: absolute; top: 48px; left: 48px;
       width: 148px; background: #fff;
       border: 1px solid var(--grey-50); border-radius: 8px;
       box-shadow: 0 4px 16px rgba(0,0,0,.12);
@@ -750,10 +730,6 @@
       </button>
     </div>
   </div>
-  <div class="dpp-mode-toggle">
-    <button class="dpp-mode-btn active" data-mode="single">Dan</button>
-    <button class="dpp-mode-btn" data-mode="range">Raspon datuma</button>
-  </div>
   <div class="dpp-weekdays">
     <div class="dpp-wd">P</div><div class="dpp-wd">U</div><div class="dpp-wd">S</div>
     <div class="dpp-wd">Č</div><div class="dpp-wd">P</div><div class="dpp-wd">S</div>
@@ -838,15 +814,12 @@
     const monList  = document.getElementById('dppMonList');
 
     let curYear, curMonth;
-    let mode       = 'single';   // 'single' | 'range'
-    let selDate    = null;        // single mode selection
-    let rangeStart = null;        // range mode: first picked date
-    let rangeEnd   = null;        // range mode: second picked date
-    let rangeStep  = 0;           // 0=none, 1=start picked, 2=both picked
-    let hoverDate  = null;        // live hover for range preview
+    let rangeStart = null;  // first picked date
+    let rangeEnd   = null;  // second picked date
+    let rangeStep  = 0;     // 0=none, 1=waiting for end, 2=done
+    let hoverDate  = null;  // hover preview
     let activeTarget = null;
 
-    /* ── helpers ── */
     function parseHR(str) {
       if (!str || !str.trim()) return null;
       const parts = str.replace(/\./g, ' ').trim().split(/\s+/);
@@ -859,248 +832,163 @@
       return date.getDate() + '.' + (date.getMonth()+1) + '.' + date.getFullYear() + '.';
     }
     function dateEq(a, b) {
-      return a && b &&
-        a.getFullYear()===b.getFullYear() &&
-        a.getMonth()===b.getMonth() &&
-        a.getDate()===b.getDate();
+      return a && b && a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate();
     }
 
-    /* ── render calendar grid ── */
     function renderGrid() {
       monLabel.textContent = MONTHS_SHORT[curMonth];
       yrLabel.textContent  = curYear;
+      monList.querySelectorAll('.dpp-mon-opt').forEach((el, i) => el.classList.toggle('sel', i === curMonth));
 
-      monList.querySelectorAll('.dpp-mon-opt').forEach((el, i) => {
-        el.classList.toggle('sel', i === curMonth);
-      });
+      const today       = new Date();
+      const firstDay    = new Date(curYear, curMonth, 1);
+      const startOffset = (firstDay.getDay() + 6) % 7;
+      const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+      const daysInPrev  = new Date(curYear, curMonth, 0).getDate();
+      const totalCells  = Math.ceil((startOffset + daysInMonth) / 7) * 7;
 
-      const today    = new Date();
-      const firstDay = new Date(curYear, curMonth, 1);
-      const startOffset  = (firstDay.getDay() + 6) % 7;
-      const daysInMonth  = new Date(curYear, curMonth + 1, 0).getDate();
-      const daysInPrev   = new Date(curYear, curMonth, 0).getDate();
-      const totalCells   = Math.ceil((startOffset + daysInMonth) / 7) * 7;
-
-      // Compute effective range endpoints (include hover preview)
-      let rS = rangeStart;
-      let rE = (mode === 'range' && rangeStep === 1 && hoverDate) ? hoverDate : rangeEnd;
-      // Normalise order
+      // Effective range with hover preview
+      const rS = rangeStart;
+      const rE = (rangeStep === 1 && hoverDate) ? hoverDate : rangeEnd;
       let lo = null, hi = null;
-      if (rS && rE) {
-        lo = rS <= rE ? rS : rE;
-        hi = rS <= rE ? rE : rS;
-      }
+      if (rS && rE) { lo = rS <= rE ? rS : rE; hi = rS <= rE ? rE : rS; }
 
       let html = '';
       for (let i = 0; i < totalCells; i++) {
         let day, month, year, isOut = false;
         if (i < startOffset) {
-          day = daysInPrev - startOffset + i + 1;
-          month = curMonth - 1; year = curYear;
+          day = daysInPrev - startOffset + i + 1; month = curMonth - 1; year = curYear;
           if (month < 0) { month = 11; year--; }
           isOut = true;
         } else if (i >= startOffset + daysInMonth) {
-          day = i - startOffset - daysInMonth + 1;
-          month = curMonth + 1; year = curYear;
+          day = i - startOffset - daysInMonth + 1; month = curMonth + 1; year = curYear;
           if (month > 11) { month = 0; year++; }
           isOut = true;
         } else {
-          day = i - startOffset + 1;
-          month = curMonth; year = curYear;
+          day = i - startOffset + 1; month = curMonth; year = curYear;
         }
         const td = new Date(year, month, day);
         const isToday = dateEq(td, today);
-
         let cls = 'dpp-d';
         if (isOut) cls += ' dpp-out';
 
-        if (mode === 'single') {
-          const isSel = dateEq(td, selDate);
-          if (isSel)              cls += ' dpp-sel';
-          else if (isToday)       cls += ' dpp-today';
+        if (lo && hi && !dateEq(lo, hi)) {
+          // Range selected (or hover preview)
+          if      (dateEq(td, lo))      cls += ' dpp-range-s';
+          else if (dateEq(td, hi))      cls += ' dpp-range-e';
+          else if (td > lo && td < hi)  cls += ' dpp-range-m';
+          if (!cls.includes('dpp-range') && isToday) cls += ' dpp-today';
+        } else if (rangeStart && !rE) {
+          // Only start picked, no hover yet
+          if (dateEq(td, rangeStart))   cls += ' dpp-sel';
+          else if (isToday)             cls += ' dpp-today';
+        } else if (lo && hi && dateEq(lo, hi)) {
+          // Same-day range → single selected
+          if (dateEq(td, lo))           cls += ' dpp-sel';
+          else if (isToday)             cls += ' dpp-today';
         } else {
-          // range mode
-          if (lo && hi && !dateEq(lo, hi)) {
-            // full range selected (or hover preview)
-            const isStart  = dateEq(td, lo);
-            const isEnd    = dateEq(td, hi);
-            const isMid    = td > lo && td < hi;
-            if (isStart)          cls += ' dpp-range-s';
-            else if (isEnd)       cls += ' dpp-range-e';
-            else if (isMid)       cls += ' dpp-range-m';
-            if (!isStart && !isEnd && isToday) cls += ' dpp-today';
-          } else if (lo && hi && dateEq(lo, hi)) {
-            // start === end: show as single selected
-            if (dateEq(td, lo))   cls += ' dpp-sel';
-            else if (isToday)     cls += ' dpp-today';
-          } else if (rangeStart && rangeStep === 1 && !rE) {
-            // only start picked, no hover
-            if (dateEq(td, rangeStart)) cls += ' dpp-sel';
-            else if (isToday)           cls += ' dpp-today';
-          } else {
-            if (isToday)          cls += ' dpp-today';
-          }
+          if (isToday)                  cls += ' dpp-today';
         }
 
         html += `<div class="${cls}" data-y="${year}" data-m="${month}" data-d="${day}"><span class="dpp-dn">${day}</span></div>`;
       }
       daysEl.innerHTML = html;
 
-      // Day interactions
       daysEl.querySelectorAll('.dpp-d:not(.dpp-out)').forEach(el => {
         el.addEventListener('click', () => {
           const d = new Date(+el.dataset.y, +el.dataset.m, +el.dataset.d);
-          if (mode === 'single') {
-            selDate = d;
+          if (rangeStep === 0 || rangeStep === 2) {
+            rangeStart = d; rangeEnd = null; rangeStep = 1; hoverDate = null;
           } else {
-            if (rangeStep === 0 || rangeStep === 2) {
-              rangeStart = d; rangeEnd = null; rangeStep = 1; hoverDate = null;
-            } else {
-              rangeEnd = d; rangeStep = 2; hoverDate = null;
-            }
+            rangeEnd = d; rangeStep = 2; hoverDate = null;
           }
           renderGrid();
         });
-        if (mode === 'range') {
-          el.addEventListener('mouseenter', () => {
-            if (rangeStep === 1) {
-              hoverDate = new Date(+el.dataset.y, +el.dataset.m, +el.dataset.d);
-              renderGrid();
-            }
-          });
-        }
+        el.addEventListener('mouseenter', () => {
+          if (rangeStep === 1) {
+            hoverDate = new Date(+el.dataset.y, +el.dataset.m, +el.dataset.d);
+            renderGrid();
+          }
+        });
       });
     }
 
-    /* ── build month dropdown ── */
     function buildMonList() {
       monList.innerHTML = MONTHS_FULL.map((name, i) =>
         `<div class="dpp-mon-opt${i===curMonth?' sel':''}" data-m="${i}">${name}</div>`
       ).join('');
       monList.querySelectorAll('.dpp-mon-opt').forEach(el => {
         el.addEventListener('click', e => {
-          e.stopPropagation();
-          curMonth = +el.dataset.m;
-          renderGrid();
-          closeMonList();
+          e.stopPropagation(); curMonth = +el.dataset.m; renderGrid(); closeMonList();
         });
       });
     }
     function openMonList()  { buildMonList(); monList.classList.add('open'); document.getElementById('dppMonBtn').classList.add('open'); }
     function closeMonList() { monList.classList.remove('open'); document.getElementById('dppMonBtn').classList.remove('open'); }
 
-    /* ── set mode UI ── */
-    function setModeUI(m) {
-      mode = m;
-      document.querySelectorAll('.dpp-mode-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.mode === m);
-      });
-    }
-
-    /* ── open / close popup ── */
     function openPicker(triggerEl) {
       activeTarget = document.getElementById(triggerEl.dataset.target);
       const existing = activeTarget ? activeTarget.textContent.trim() : '';
-
-      // reset state
       rangeStart = null; rangeEnd = null; rangeStep = 0; hoverDate = null;
 
       if (existing.includes('–')) {
-        // range format "d.m.yyyy. – d.m.yyyy."
         const parts = existing.split('–');
         const s = parseHR(parts[0].trim()), e = parseHR(parts[1] && parts[1].trim());
-        if (s && e) {
-          setModeUI('range');
-          rangeStart = s; rangeEnd = e; rangeStep = 2;
-          curYear = s.getFullYear(); curMonth = s.getMonth();
-        } else {
-          setModeUI('single');
-          selDate = new Date(); curYear = selDate.getFullYear(); curMonth = selDate.getMonth();
-        }
+        if (s && e) { rangeStart = s; rangeEnd = e; rangeStep = 2; curYear = s.getFullYear(); curMonth = s.getMonth(); }
+        else { const ref = new Date(); curYear = ref.getFullYear(); curMonth = ref.getMonth(); }
       } else {
-        setModeUI('single');
-        const parsed = parseHR(existing);
-        selDate = parsed || new Date();
-        curYear = selDate.getFullYear(); curMonth = selDate.getMonth();
+        const parsed = parseHR(existing) || new Date();
+        rangeStart = parsed; rangeEnd = parsed; rangeStep = 2;
+        curYear = parsed.getFullYear(); curMonth = parsed.getMonth();
       }
 
       renderGrid();
 
-      // Position popup
       const rect = triggerEl.getBoundingClientRect();
       let left = Math.min(rect.left, window.innerWidth - 380);
       popup.style.left = left + 'px';
       const spaceBelow = window.innerHeight - rect.bottom;
-      if (spaceBelow >= 380) {
-        popup.style.top    = (rect.bottom + 6) + 'px';
-        popup.style.bottom = 'auto';
+      if (spaceBelow >= 420) {
+        popup.style.top = (rect.bottom + 6) + 'px'; popup.style.bottom = 'auto';
       } else {
-        popup.style.bottom = (window.innerHeight - rect.top + 6) + 'px';
-        popup.style.top    = 'auto';
+        popup.style.bottom = (window.innerHeight - rect.top + 6) + 'px'; popup.style.top = 'auto';
       }
-
       popup.classList.add('open');
       backdrop.classList.add('open');
     }
 
     function closePicker() {
-      popup.classList.remove('open');
-      backdrop.classList.remove('open');
-      closeMonList();
+      popup.classList.remove('open'); backdrop.classList.remove('open'); closeMonList();
     }
 
-    /* ── navigation ── */
-    document.getElementById('dppPrevMon').addEventListener('click', () => {
-      curMonth--; if (curMonth < 0) { curMonth = 11; curYear--; } renderGrid();
-    });
-    document.getElementById('dppNextMon').addEventListener('click', () => {
-      curMonth++; if (curMonth > 11) { curMonth = 0; curYear++; } renderGrid();
-    });
+    document.getElementById('dppPrevMon').addEventListener('click', () => { curMonth--; if (curMonth < 0) { curMonth = 11; curYear--; } renderGrid(); });
+    document.getElementById('dppNextMon').addEventListener('click', () => { curMonth++; if (curMonth > 11) { curMonth = 0; curYear++; } renderGrid(); });
     document.getElementById('dppPrevYr').addEventListener('click',  () => { curYear--; renderGrid(); });
     document.getElementById('dppNextYr').addEventListener('click',  () => { curYear++; renderGrid(); });
-
     document.getElementById('dppMonBtn').addEventListener('click', e => {
-      e.stopPropagation();
-      monList.classList.contains('open') ? closeMonList() : openMonList();
+      e.stopPropagation(); monList.classList.contains('open') ? closeMonList() : openMonList();
     });
 
-    /* ── mode toggle ── */
-    document.querySelectorAll('.dpp-mode-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const newMode = btn.dataset.mode;
-        if (newMode === mode) return;
-        setModeUI(newMode);
-        if (newMode === 'single') {
-          selDate = new Date();
-          rangeStart = null; rangeEnd = null; rangeStep = 0; hoverDate = null;
-        } else {
-          selDate = null;
-          rangeStart = null; rangeEnd = null; rangeStep = 0; hoverDate = null;
-        }
-        renderGrid();
-      });
-    });
-
-    /* ── cancel / ok ── */
     document.getElementById('dppCancel').addEventListener('click', closePicker);
     document.getElementById('dppOk').addEventListener('click', () => {
       if (activeTarget) {
-        if (mode === 'single' && selDate) {
-          activeTarget.textContent = formatHR(selDate);
-        } else if (mode === 'range' && rangeStart && rangeEnd) {
-          const lo = rangeStart <= rangeEnd ? rangeStart : rangeEnd;
-          const hi = rangeStart <= rangeEnd ? rangeEnd : rangeStart;
-          activeTarget.textContent = formatHR(lo) + ' – ' + formatHR(hi);
+        if (rangeStart && rangeEnd) {
+          if (dateEq(rangeStart, rangeEnd)) {
+            activeTarget.textContent = formatHR(rangeStart);
+          } else {
+            const lo = rangeStart <= rangeEnd ? rangeStart : rangeEnd;
+            const hi = rangeStart <= rangeEnd ? rangeEnd : rangeStart;
+            activeTarget.textContent = formatHR(lo) + ' – ' + formatHR(hi);
+          }
+        } else if (rangeStart) {
+          activeTarget.textContent = formatHR(rangeStart);
         }
       }
       closePicker();
     });
 
-    /* ── backdrop closes picker ── */
     backdrop.addEventListener('click', closePicker);
     popup.addEventListener('click', e => e.stopPropagation());
-
-    /* ── wire triggers ── */
     document.querySelectorAll('.dpp-trigger').forEach(el => {
       el.addEventListener('click', () => openPicker(el));
     });
