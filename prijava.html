@@ -124,17 +124,47 @@
     .field-input:focus { border-color: var(--blue-400); }
     .field-input.with-right { padding-right: 40px; }
     .field-icon-left {
-      position: absolute; left: 10px; top: 50%;
+      position: absolute; left: 10px; top: 20px;
       transform: translateY(-50%); color: var(--grey-400);
       display: flex; pointer-events: none;
+      transition: color .15s;
     }
     .field-icon-right {
-      position: absolute; right: 10px; top: 50%;
+      position: absolute; right: 10px; top: 20px;
       transform: translateY(-50%); color: var(--grey-400);
       display: flex; cursor: pointer; background: none; border: none;
-      padding: 0;
+      padding: 0; transition: color .15s;
     }
     .field-icon-right:hover { color: var(--grey-600); }
+
+    /* ─── ERROR STATE ─── */
+    .field-input.error { border-color: #e53935; }
+    .field-input.error + .field-icon-right { color: #e53935; }
+    .field-icon-left.error { color: #e53935; }
+    .field-err {
+      font-size: 12px; color: #e53935; margin-top: 5px;
+      padding-left: 2px; display: none; line-height: 1.4;
+    }
+    .field-err.show { display: block; }
+
+    /* ─── SHAKE ─── */
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-7px); }
+      40%      { transform: translateX(7px); }
+      60%      { transform: translateX(-4px); }
+      80%      { transform: translateX(4px); }
+    }
+    .shake { animation: shake .35s ease; }
+
+    /* ─── SUCCESS ─── */
+    .success-msg {
+      display: none; width: 100%; background: #e8f7ed;
+      border: 1px solid #a5d6b5; border-radius: 4px;
+      padding: 12px 16px; font-size: 14px; color: #1b5e35;
+      font-weight: 500; text-align: center; margin-bottom: 16px;
+    }
+    .success-msg.show { display: block; }
 
     /* ─── BUTTONS ─── */
     .btn-primary {
@@ -143,8 +173,22 @@
       border-radius: 4px; font-family: 'Inter', sans-serif;
       font-size: 14px; font-weight: 600; cursor: pointer;
       transition: background .15s; margin-bottom: 16px;
+      position: relative;
     }
-    .btn-primary:hover { background: var(--blue-600); }
+    .btn-primary:hover:not(:disabled) { background: var(--blue-600); }
+    .btn-primary:disabled { opacity: .7; cursor: not-allowed; }
+    .btn-primary.loading { color: transparent; pointer-events: none; }
+    .btn-primary.loading::after {
+      content: ''; position: absolute;
+      width: 17px; height: 17px;
+      border: 2px solid rgba(255,255,255,.35);
+      border-top-color: #fff; border-radius: 50%;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
     .btn-tertiary {
       background: none; border: none; cursor: pointer;
       font-family: 'Inter', sans-serif; font-size: 14px;
@@ -255,23 +299,25 @@
 
     <div class="form-fields">
       <div class="field-wrap">
-        <span class="field-icon-left">
+        <span class="field-icon-left" id="iconUser">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
         </span>
         <input class="field-input" type="text" placeholder="Korisnik" id="loginUser" autocomplete="username">
+        <div class="field-err" id="errUser">Molimo unesite korisničko ime.</div>
       </div>
       <div class="field-wrap">
-        <span class="field-icon-left">
+        <span class="field-icon-left" id="iconPass">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.65 10C11.83 7.67 9.61 6 7 6c-3.31 0-6 2.69-6 6s2.69 6 6 6c2.61 0 4.83-1.67 5.65-4H17v4h4v-4h2v-4H12.65zM7 14c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/></svg>
         </span>
         <input class="field-input with-right" type="password" placeholder="Lozinka" id="loginPass" autocomplete="current-password">
         <button class="field-icon-right" id="togglePass" title="Prikaži lozinku" type="button">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" id="eyeIcon"><path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/></svg>
         </button>
+        <div class="field-err" id="errPass">Molimo unesite lozinku.</div>
       </div>
     </div>
 
-    <button class="btn-primary" onclick="window.location.href='intervencije.html'">Prijava</button>
+    <button class="btn-primary" id="loginBtn">Prijava</button>
     <button class="btn-tertiary" id="showChangePw">Promjena lozinke</button>
   </div>
 
@@ -311,42 +357,118 @@
 
     <div class="form-fields" style="margin-bottom:28px">
       <div class="field-wrap">
-        <span class="field-icon-left">
+        <span class="field-icon-left" id="iconCpUser">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
         </span>
-        <input class="field-input" type="text" placeholder="Korisnik" autocomplete="username">
+        <input class="field-input" type="text" placeholder="Korisnik" id="cpUser" autocomplete="username">
+        <div class="field-err" id="errCpUser">Molimo unesite korisničko ime.</div>
       </div>
     </div>
 
-    <button class="btn-primary">Pošalji email za promjenu lozinke</button>
+    <div class="success-msg" id="cpSuccess">Email za promjenu lozinke je poslan!</div>
+    <button class="btn-primary" id="cpBtn">Pošalji email za promjenu lozinke</button>
     <button class="btn-tertiary" id="backToLogin">Povratak na prijavu</button>
   </div>
 
 </div>
 
 <script>
-  // Show correct card based on URL param
+  /* ── helpers ── */
+  function setError(inputId, iconId, errId, msg) {
+    const inp  = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    const err  = document.getElementById(errId);
+    inp.classList.add('error');
+    if (icon) icon.classList.add('error');
+    if (err)  { err.textContent = msg; err.classList.add('show'); }
+  }
+  function clearError(inputId, iconId, errId) {
+    const inp  = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    const err  = document.getElementById(errId);
+    inp.classList.remove('error');
+    if (icon) icon.classList.remove('error');
+    if (err)  err.classList.remove('show');
+  }
+  function triggerShake(el) {
+    el.classList.remove('shake');
+    void el.offsetWidth; // reflow to restart animation
+    el.classList.add('shake');
+    el.addEventListener('animationend', () => el.classList.remove('shake'), { once: true });
+  }
+
+  /* ── card switching ── */
   const mode = new URLSearchParams(window.location.search).get('mode');
   if (mode === 'lozinka') {
     document.getElementById('cardLogin').classList.add('hidden');
     document.getElementById('cardChangePw').classList.remove('hidden');
   }
-
-  // Switch to change-password view
   document.getElementById('showChangePw').addEventListener('click', () => {
     document.getElementById('cardLogin').classList.add('hidden');
     document.getElementById('cardChangePw').classList.remove('hidden');
     history.replaceState(null, '', '?mode=lozinka');
   });
-
-  // Back to login
   document.getElementById('backToLogin').addEventListener('click', () => {
     document.getElementById('cardChangePw').classList.add('hidden');
     document.getElementById('cardLogin').classList.remove('hidden');
+    // reset change-pw state
+    clearError('cpUser','iconCpUser','errCpUser');
+    document.getElementById('cpUser').value = '';
+    document.getElementById('cpSuccess').classList.remove('show');
+    const cpBtn = document.getElementById('cpBtn');
+    cpBtn.classList.remove('loading'); cpBtn.disabled = false;
     history.replaceState(null, '', 'prijava.html');
   });
 
-  // Password show/hide toggle
+  /* ── real-time clear errors on typing ── */
+  document.getElementById('loginUser').addEventListener('input', () => clearError('loginUser','iconUser','errUser'));
+  document.getElementById('loginPass').addEventListener('input', () => clearError('loginPass','iconPass','errPass'));
+  document.getElementById('cpUser').addEventListener('input', () => clearError('cpUser','iconCpUser','errCpUser'));
+
+  /* ── LOGIN submit ── */
+  function doLogin() {
+    const user = document.getElementById('loginUser').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    let valid = true;
+
+    if (!user) { setError('loginUser','iconUser','errUser','Molimo unesite korisničko ime.'); valid = false; }
+    if (!pass) { setError('loginPass','iconPass','errPass','Molimo unesite lozinku.'); valid = false; }
+
+    if (!valid) {
+      triggerShake(document.getElementById('cardLogin'));
+      return;
+    }
+
+    const btn = document.getElementById('loginBtn');
+    btn.classList.add('loading'); btn.disabled = true;
+    setTimeout(() => { window.location.href = 'intervencije.html'; }, 900);
+  }
+
+  document.getElementById('loginBtn').addEventListener('click', doLogin);
+  document.getElementById('loginUser').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('loginPass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+  /* ── CHANGE PASSWORD submit ── */
+  function doChangePw() {
+    const user = document.getElementById('cpUser').value.trim();
+    if (!user) {
+      setError('cpUser','iconCpUser','errCpUser','Molimo unesite korisničko ime.');
+      triggerShake(document.getElementById('cardChangePw'));
+      return;
+    }
+    const btn = document.getElementById('cpBtn');
+    btn.classList.add('loading'); btn.disabled = true;
+    setTimeout(() => {
+      btn.classList.remove('loading'); btn.disabled = false;
+      document.getElementById('cpSuccess').classList.add('show');
+      document.getElementById('cpUser').value = '';
+    }, 1000);
+  }
+
+  document.getElementById('cpBtn').addEventListener('click', doChangePw);
+  document.getElementById('cpUser').addEventListener('keydown', e => { if (e.key === 'Enter') doChangePw(); });
+
+  /* ── PASSWORD SHOW / HIDE ── */
   document.getElementById('togglePass').addEventListener('click', () => {
     const input = document.getElementById('loginPass');
     const icon  = document.getElementById('eyeIcon');
