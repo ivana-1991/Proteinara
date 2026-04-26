@@ -178,9 +178,39 @@
     .dp-table tbody td { padding: 12px; font-size: 14px; color: var(--grey-800); }
 
     /* ─── UPLOAD ZONE ─── */
-    .upload-zone { border: 2px dashed var(--grey-100); border-radius: 6px; padding: 32px 24px; text-align: center; margin-bottom: 28px; }
-    .upload-zone-title { font-size: 15px; font-weight: 600; color: var(--grey-700); margin-bottom: 6px; }
-    .upload-zone-sub { font-size: 13px; color: var(--grey-300); margin-bottom: 16px; }
+    .ul-zone {
+      border: 1px dashed var(--grey-100); border-radius: 24px; padding: 24px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 24px; margin-bottom: 28px; min-height: 192px;
+      cursor: pointer; transition: background .15s, border-color .15s;
+    }
+    .ul-zone:hover, .ul-zone.ul-hover { background: var(--bg-dropdown); border-color: var(--blue-100); }
+    .ul-zone.ul-error { border-color: #e66358; }
+    .ul-zone.ul-processing { cursor: default; gap: 32px; }
+    .ul-inner {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 16px; text-align: center; width: 100%; max-width: 320px;
+    }
+    .ul-text { display: flex; flex-direction: column; gap: 8px; }
+    .ul-title { font-size: 16px; font-weight: 600; color: var(--grey-700); line-height: 24px; }
+    .ul-sub   { font-size: 12px; font-weight: 400; color: var(--grey-400); line-height: 16px; }
+    .ul-btn {
+      height: 32px; background: var(--blue-500); color: #fff;
+      border: none; border-radius: 4px; font-family: 'Inter',sans-serif;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      display: flex; align-items: center; gap: 4px; padding: 6px 12px;
+      transition: background .15s;
+    }
+    .ul-btn:hover { background: var(--blue-600); }
+    .ul-prog-wrap { width: 100%; height: 8px; background: var(--grey-50); border-radius: 24px; overflow: hidden; }
+    .ul-prog-bar  { height: 100%; background: var(--blue-400); border-radius: 24px; transition: width .12s linear; }
+    .ul-cancel-btn {
+      height: 32px; background: #fff; color: var(--blue-500);
+      border: 1px solid var(--blue-100); border-radius: 4px;
+      font-family: 'Inter',sans-serif; font-size: 12px; font-weight: 600;
+      cursor: pointer; padding: 6px 12px; transition: background .15s;
+    }
+    .ul-cancel-btn:hover { background: var(--bg-dropdown); }
 
     /* ─── MAP ─── */
     .map-placeholder { width: 100%; height: 260px; border-radius: 6px; border: 1px solid var(--grey-100); overflow: hidden; margin-top: 20px; }
@@ -387,11 +417,11 @@
     </a>
     <div class="nav-links">
       <a class="nav-link active" href="intervencije.html">Intervencije</a>
-      <a class="nav-link" href="#">Pokazatelji</a>
+      <a class="nav-link" href="pokazatelji.html">Pokazatelji</a>
       <a class="nav-link" href="#">Servisni partneri</a>
       <a class="nav-link" href="#">Zahtjevi</a>
       <a class="nav-link" href="#">Korisnici</a>
-      <a class="nav-link" href="#">Financije</a>
+      <a class="nav-link" href="financije.html">Financije</a>
       <a class="nav-link" href="#">Import</a>
     </div>
   </div>
@@ -559,14 +589,31 @@
 
       <!-- DOKUMENTI -->
       <div class="dp-panel" id="panel-dokumenti">
-        <div class="upload-zone">
-          <div class="upload-zone-title">Ubacite svoje datoteke ovdje</div>
-          <div class="upload-zone-sub">Podržani format je xlsx, a maksimalna veličina datoteke je 5 MB</div>
-          <button class="btn-primary" style="margin:0 auto">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z" fill="white"/></svg>
-            Prijenos datoteke
-          </button>
+
+        <!-- Upload zone -->
+        <div class="ul-zone" id="ulZone">
+          <!-- Default / Error state -->
+          <div class="ul-inner" id="ulDefault">
+            <div class="ul-text">
+              <p class="ul-title">Ubacite svoje datoteke ovdje</p>
+              <p class="ul-sub" id="ulSubText">Podržani format je xlsx, a maksimalna veličina datoteke je 5 MB</p>
+            </div>
+            <button class="ul-btn" id="ulBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>
+              Prijenos datoteke
+            </button>
+          </div>
+          <!-- Process state -->
+          <div class="ul-inner" id="ulProcess" style="display:none">
+            <div class="ul-text">
+              <p class="ul-title">Datoteke se dohvaćaju</p>
+              <p class="ul-sub" id="ulPct">0%</p>
+            </div>
+            <div class="ul-prog-wrap"><div class="ul-prog-bar" id="ulBar" style="width:0%"></div></div>
+            <button class="ul-cancel-btn" id="ulCancelUpload">Prekini prijenos</button>
+          </div>
         </div>
+        <input type="file" id="ulInput" accept=".xlsx,.xls" style="display:none">
         <div class="dp-table-section-title">Dokumenti</div>
         <div class="dp-table-wrap">
           <table class="dp-table">
@@ -1002,6 +1049,97 @@
     btn.addEventListener('click', e => { e.stopPropagation(); dd.classList.toggle('open'); });
     document.addEventListener('click', () => dd.classList.remove('open'));
     dd.addEventListener('click', e => e.stopPropagation());
+  })();
+
+  // ─── UPLOAD COMPONENT ────────────────────────────────────────────────────
+  (function() {
+    const zone      = document.getElementById('ulZone');
+    const defView   = document.getElementById('ulDefault');
+    const proView   = document.getElementById('ulProcess');
+    const btn       = document.getElementById('ulBtn');
+    const input     = document.getElementById('ulInput');
+    const pctEl     = document.getElementById('ulPct');
+    const barEl     = document.getElementById('ulBar');
+    const cancelBtn = document.getElementById('ulCancelUpload');
+    const subText   = document.getElementById('ulSubText');
+    if (!zone) return;
+
+    let timer = null;
+
+    function resetState() {
+      zone.classList.remove('ul-processing', 'ul-error', 'ul-hover');
+      defView.style.display = '';
+      proView.style.display = 'none';
+      subText.textContent   = 'Podržani format je xlsx, a maksimalna veličina datoteke je 5 MB';
+      input.value = '';
+    }
+
+    function startUpload(file) {
+      if (!/\.(xlsx|xls)$/i.test(file.name)) {
+        zone.classList.add('ul-error');
+        zone.classList.remove('ul-hover');
+        subText.textContent = 'Neispravan format datoteke. Molimo pokušajte ponovno.';
+        input.value = '';
+        return;
+      }
+      zone.classList.remove('ul-error', 'ul-hover');
+      zone.classList.add('ul-processing');
+      defView.style.display = 'none';
+      proView.style.display = '';
+      barEl.style.width = '0%';
+      pctEl.textContent = '0%';
+
+      let pct = 0;
+      timer = setInterval(() => {
+        pct = Math.min(pct + Math.random() * 9 + 3, 100);
+        barEl.style.width = pct.toFixed(1) + '%';
+        pctEl.textContent = Math.round(pct) + '%';
+        if (pct >= 100) {
+          clearInterval(timer);
+          setTimeout(() => { addFileRow(file.name); resetState(); }, 350);
+        }
+      }, 120);
+    }
+
+    function addFileRow(filename) {
+      const tbody  = document.querySelector('#panel-dokumenti .dp-table tbody');
+      if (!tbody) return;
+      const today  = new Date();
+      const date   = today.getDate() + '.' + (today.getMonth()+1) + '.' + today.getFullYear() + '.';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${filename.replace(/</g,'&lt;')}</td>`
+        + `<td><div style="display:flex;align-items:center;gap:8px"><div class="chat-av" style="background:var(--bg-dropdown);color:var(--blue-700)">IV</div>Ivana</div></td>`
+        + `<td>${date}</td>`;
+      tbody.insertBefore(tr, tbody.firstChild);
+    }
+
+    /* Click button → open file dialog */
+    btn.addEventListener('click', e => { e.stopPropagation(); input.click(); });
+
+    /* Zone click (not while processing) */
+    zone.addEventListener('click', () => {
+      if (!zone.classList.contains('ul-processing')) input.click();
+    });
+
+    input.addEventListener('change', () => {
+      if (input.files.length) startUpload(input.files[0]);
+    });
+
+    cancelBtn.addEventListener('click', e => {
+      e.stopPropagation();
+      clearInterval(timer);
+      resetState();
+    });
+
+    /* Drag & drop */
+    zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('ul-hover'); });
+    zone.addEventListener('dragleave', ()  => zone.classList.remove('ul-hover'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('ul-hover');
+      if (!zone.classList.contains('ul-processing') && e.dataTransfer.files.length)
+        startUpload(e.dataTransfer.files[0]);
+    });
   })();
 </script>
 </body>
