@@ -195,6 +195,92 @@
     .pg-btn:disabled { opacity: .3; cursor: not-allowed; }
     .pg-sep { padding: 0 4px; color: var(--grey-300); font-size: 13px; }
 
+    /* ─── DATE PICKER ─── */
+    .dpp-trigger { cursor: pointer; transition: border-color .15s, background .15s; }
+    .dpp-trigger:hover { background: #f5fbfe; border-color: var(--blue-300); }
+
+    .dpp-backdrop { display: none; position: fixed; inset: 0; z-index: 490; }
+    .dpp-backdrop.open { display: block; }
+
+    .dpp-popup {
+      display: none; position: fixed; z-index: 491;
+      width: 360px; background: #fff;
+      border: 1px solid var(--grey-50); border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.13), 0 2px 6px rgba(0,0,0,.06);
+      font-family: 'Inter', sans-serif; overflow: visible;
+    }
+    .dpp-popup.open { display: block; }
+
+    /* Header */
+    .dpp-header { display: flex; align-items: center; padding: 16px 14px 10px; }
+    .dpp-month-wrap { display: flex; align-items: center; flex: 1; position: relative; }
+    .dpp-year-wrap  { display: flex; align-items: center; }
+    .dpp-nav {
+      width: 32px; height: 32px; border: none; background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      border-radius: 50%; color: var(--grey-500); transition: background .1s;
+    }
+    .dpp-nav:hover { background: var(--bg-table); }
+    .dpp-mon-btn, .dpp-yr-btn {
+      border: none; background: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      color: var(--grey-800); display: flex; align-items: center; gap: 4px;
+      padding: 5px 7px; border-radius: 4px; transition: background .1s, color .1s;
+      white-space: nowrap;
+    }
+    .dpp-mon-btn:hover, .dpp-yr-btn:hover { background: var(--bg-table); }
+    .dpp-mon-btn.open { background: var(--bg-dropdown); color: var(--blue-500); }
+
+    /* Weekday labels */
+    .dpp-weekdays { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 14px 2px; }
+    .dpp-wd {
+      height: 32px; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--grey-300); letter-spacing: .4px;
+    }
+
+    /* Day grid */
+    .dpp-days { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 14px 4px; }
+    .dpp-d {
+      height: 38px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px; color: var(--grey-700);
+      border-radius: 50%; transition: background .1s, color .1s; position: relative;
+    }
+    .dpp-d:hover:not(.dpp-out):not(.dpp-sel) { background: var(--bg-table); }
+    .dpp-out { color: var(--grey-100); cursor: default; pointer-events: none; }
+    .dpp-today { border: 2px solid var(--blue-500); color: var(--blue-500); font-weight: 600; }
+    .dpp-sel   { background: var(--blue-500) !important; color: #fff !important; font-weight: 600; border: none !important; }
+    .dpp-sel:hover { background: var(--blue-600) !important; }
+
+    /* Footer */
+    .dpp-footer {
+      display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+      padding: 10px 16px 14px; border-top: 1px solid var(--grey-50);
+    }
+    .dpp-cancel-btn, .dpp-ok-btn {
+      border: none; background: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      color: var(--blue-500); padding: 8px 14px; border-radius: 4px;
+      transition: background .1s;
+    }
+    .dpp-cancel-btn:hover, .dpp-ok-btn:hover { background: var(--bg-dropdown); }
+
+    /* Month dropdown list */
+    .dpp-mon-list {
+      position: absolute; top: 36px; left: 32px;
+      width: 148px; background: #fff;
+      border: 1px solid var(--grey-50); border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      overflow-y: auto; max-height: 228px; z-index: 10;
+      display: none;
+    }
+    .dpp-mon-list.open { display: block; }
+    .dpp-mon-opt {
+      padding: 10px 16px; font-size: 14px; color: var(--grey-700);
+      cursor: pointer; font-weight: 500; transition: background .1s;
+    }
+    .dpp-mon-opt:hover { background: var(--bg-table); }
+    .dpp-mon-opt.sel { background: var(--bg-dropdown); color: var(--blue-500); font-weight: 600; }
+
     /* ─── USER DROPDOWN ─── */
     .nav-user-wrap { position: relative; flex-shrink: 0; }
     .nav-dropdown {
@@ -372,7 +458,7 @@
           <div class="ff"><span class="ff-label">Broj slučaja</span><div class="ff-val" id="dp-broj"></div></div>
           <div class="ff">
             <span class="ff-label">Odabir datuma</span>
-            <div class="ff-val di">
+            <div class="ff-val di dpp-trigger" data-target="dp-datum">
               <svg class="ff-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z" fill="#888686"/></svg>
               <span id="dp-datum"></span>
             </div>
@@ -426,9 +512,9 @@
           <div class="ff"><span class="ff-label">Email klijent</span><div class="ff-val">ivan.horvat@email.com</div></div>
           <div class="ff">
             <span class="ff-label">Planirani datum završetka popravka</span>
-            <div class="ff-val di">
+            <div class="ff-val di dpp-trigger" data-target="dp-plan">
               <svg class="ff-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z" fill="#888686"/></svg>
-              21.3.2026.
+              <span id="dp-plan">21.3.2026.</span>
             </div>
           </div>
         </div>
@@ -525,11 +611,11 @@
         <div class="ff-grid" style="margin-bottom:20px;max-width:640px">
           <div class="ff">
             <span class="ff-label">Datum zaključka</span>
-            <div class="ff-val di"><svg class="ff-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z" fill="#888686"/></svg>10.4.2024.</div>
+            <div class="ff-val di dpp-trigger" data-target="dp-zakl"><svg class="ff-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z" fill="#888686"/></svg><span id="dp-zakl">10.4.2024.</span></div>
           </div>
           <div class="ff">
             <span class="ff-label">Zadnja izmjena</span>
-            <div class="ff-val di"><svg class="ff-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z" fill="#888686"/></svg>10.4.2024.</div>
+            <div class="ff-val di dpp-trigger" data-target="dp-izmj"><svg class="ff-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z" fill="#888686"/></svg><span id="dp-izmj">10.4.2024.</span></div>
           </div>
           <div class="ff"><span class="ff-label">Težina vozila</span><div class="ff-val">2500kg</div></div>
           <div class="ff"><span class="ff-label">Broj šasije</span><div class="ff-val">WV2ZZZZ1923859099</div></div>
@@ -589,6 +675,49 @@
   </div><!-- /dp-body -->
 </div><!-- /page -->
 
+<!-- DATE PICKER POPUP -->
+<div class="dpp-backdrop" id="dppBackdrop"></div>
+<div class="dpp-popup" id="dppPopup">
+  <div class="dpp-header">
+    <div class="dpp-month-wrap">
+      <button class="dpp-nav" id="dppPrevMon" title="Prethodni mjesec">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg>
+      </button>
+      <button class="dpp-mon-btn" id="dppMonBtn">
+        <span id="dppMonLabel">Sij</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      </button>
+      <button class="dpp-nav" id="dppNextMon" title="Sljedeći mjesec">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>
+      </button>
+      <!-- Month dropdown -->
+      <div class="dpp-mon-list" id="dppMonList"></div>
+    </div>
+    <div class="dpp-year-wrap">
+      <button class="dpp-nav" id="dppPrevYr" title="Prethodna godina">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg>
+      </button>
+      <button class="dpp-yr-btn" id="dppYrBtn">
+        <span id="dppYrLabel">2025</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      </button>
+      <button class="dpp-nav" id="dppNextYr" title="Sljedeća godina">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="dpp-weekdays">
+    <div class="dpp-wd">P</div><div class="dpp-wd">U</div><div class="dpp-wd">S</div>
+    <div class="dpp-wd">Č</div><div class="dpp-wd">P</div><div class="dpp-wd">S</div>
+    <div class="dpp-wd">N</div>
+  </div>
+  <div class="dpp-days" id="dppDays"></div>
+  <div class="dpp-footer">
+    <button class="dpp-cancel-btn" id="dppCancel">Odustani</button>
+    <button class="dpp-ok-btn"     id="dppOk">OK</button>
+  </div>
+</div>
+
 <script>
   // Read URL params
   const p = new URLSearchParams(window.location.search);
@@ -646,6 +775,178 @@
       box.innerHTML = on ? '<svg width="12" height="12" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="white"/></svg>' : '';
     });
   });
+
+  // ─── DATE PICKER ─────────────────────────────────────────────────────────
+  (function() {
+    const MONTHS_SHORT = ['Sij','Velj','Ožu','Tra','Svi','Lip','Srp','Kol','Ruj','Lis','Stu','Pro'];
+    const MONTHS_FULL  = ['Siječanj','Veljača','Ožujak','Travanj','Svibanj','Lipanj',
+                          'Srpanj','Kolovoz','Rujan','Listopad','Studeni','Prosinac'];
+
+    const popup    = document.getElementById('dppPopup');
+    const backdrop = document.getElementById('dppBackdrop');
+    const daysEl   = document.getElementById('dppDays');
+    const monLabel = document.getElementById('dppMonLabel');
+    const yrLabel  = document.getElementById('dppYrLabel');
+    const monList  = document.getElementById('dppMonList');
+
+    let curYear, curMonth; // viewing
+    let selDate = null;    // Date object or null
+    let activeTarget = null; // span element to update
+
+    /* ── helpers ── */
+    function parseHR(str) {
+      // "d.m.yyyy." or "d.m.yyyy"
+      if (!str || !str.trim()) return null;
+      const parts = str.replace(/\./g, ' ').trim().split(/\s+/);
+      if (parts.length < 3) return null;
+      const d = parseInt(parts[0]), m = parseInt(parts[1]) - 1, y = parseInt(parts[2]);
+      if (isNaN(d) || isNaN(m) || isNaN(y)) return null;
+      return new Date(y, m, d);
+    }
+    function formatHR(date) {
+      return date.getDate() + '.' + (date.getMonth()+1) + '.' + date.getFullYear() + '.';
+    }
+
+    /* ── render calendar grid ── */
+    function renderGrid() {
+      monLabel.textContent = MONTHS_SHORT[curMonth];
+      yrLabel.textContent  = curYear;
+
+      // highlight active month in list
+      monList.querySelectorAll('.dpp-mon-opt').forEach((el, i) => {
+        el.classList.toggle('sel', i === curMonth);
+      });
+
+      const today   = new Date();
+      const firstDay = new Date(curYear, curMonth, 1);
+      // Monday-first: 0=Mon…6=Sun  (getDay: 0=Sun,1=Mon…6=Sat)
+      let startOffset = (firstDay.getDay() + 6) % 7; // 0 if Mon, 6 if Sun
+      const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+      const daysInPrev  = new Date(curYear, curMonth, 0).getDate();
+      const totalCells  = Math.ceil((startOffset + daysInMonth) / 7) * 7;
+
+      let html = '';
+      for (let i = 0; i < totalCells; i++) {
+        let day, month, year, isOut = false;
+        if (i < startOffset) {
+          day = daysInPrev - startOffset + i + 1;
+          month = curMonth - 1; year = curYear;
+          if (month < 0) { month = 11; year--; }
+          isOut = true;
+        } else if (i >= startOffset + daysInMonth) {
+          day = i - startOffset - daysInMonth + 1;
+          month = curMonth + 1; year = curYear;
+          if (month > 11) { month = 0; year++; }
+          isOut = true;
+        } else {
+          day = i - startOffset + 1;
+          month = curMonth; year = curYear;
+        }
+        const thisDate = new Date(year, month, day);
+        const isToday  = today.getDate()===day && today.getMonth()===month && today.getFullYear()===year;
+        const isSel    = selDate && selDate.getDate()===day && selDate.getMonth()===month && selDate.getFullYear()===year;
+        let cls = 'dpp-d';
+        if (isOut) cls += ' dpp-out';
+        if (isToday && !isSel) cls += ' dpp-today';
+        if (isSel) cls += ' dpp-sel';
+        html += `<div class="${cls}" data-y="${year}" data-m="${month}" data-d="${day}">${day}</div>`;
+      }
+      daysEl.innerHTML = html;
+
+      // day click
+      daysEl.querySelectorAll('.dpp-d:not(.dpp-out)').forEach(el => {
+        el.addEventListener('click', () => {
+          selDate = new Date(+el.dataset.y, +el.dataset.m, +el.dataset.d);
+          renderGrid();
+        });
+      });
+    }
+
+    /* ── build month dropdown ── */
+    function buildMonList() {
+      monList.innerHTML = MONTHS_FULL.map((name, i) =>
+        `<div class="dpp-mon-opt${i===curMonth?' sel':''}" data-m="${i}">${name}</div>`
+      ).join('');
+      monList.querySelectorAll('.dpp-mon-opt').forEach(el => {
+        el.addEventListener('click', e => {
+          e.stopPropagation();
+          curMonth = +el.dataset.m;
+          renderGrid();
+          closeMonList();
+        });
+      });
+    }
+    function openMonList()  { buildMonList(); monList.classList.add('open'); document.getElementById('dppMonBtn').classList.add('open'); }
+    function closeMonList() { monList.classList.remove('open'); document.getElementById('dppMonBtn').classList.remove('open'); }
+
+    /* ── open / close popup ── */
+    function openPicker(triggerEl) {
+      activeTarget = document.getElementById(triggerEl.dataset.target);
+      // parse existing date or default to today
+      const existing = activeTarget ? parseHR(activeTarget.textContent) : null;
+      const ref = existing || new Date();
+      selDate  = existing;
+      curYear  = ref.getFullYear();
+      curMonth = ref.getMonth();
+      renderGrid();
+
+      // position: below trigger, or above if near bottom
+      const rect = triggerEl.getBoundingClientRect();
+      popup.style.left = rect.left + 'px';
+      const spaceBelow = window.innerHeight - rect.bottom;
+      if (spaceBelow >= 380) {
+        popup.style.top  = (rect.bottom + 6) + 'px';
+        popup.style.bottom = 'auto';
+      } else {
+        popup.style.bottom = (window.innerHeight - rect.top + 6) + 'px';
+        popup.style.top = 'auto';
+      }
+
+      popup.classList.add('open');
+      backdrop.classList.add('open');
+    }
+    function closePicker() {
+      popup.classList.remove('open');
+      backdrop.classList.remove('open');
+      closeMonList();
+    }
+
+    /* ── navigation ── */
+    document.getElementById('dppPrevMon').addEventListener('click', () => {
+      curMonth--; if (curMonth < 0) { curMonth = 11; curYear--; } renderGrid();
+    });
+    document.getElementById('dppNextMon').addEventListener('click', () => {
+      curMonth++; if (curMonth > 11) { curMonth = 0; curYear++; } renderGrid();
+    });
+    document.getElementById('dppPrevYr').addEventListener('click', () => { curYear--; renderGrid(); });
+    document.getElementById('dppNextYr').addEventListener('click', () => { curYear++; renderGrid(); });
+
+    document.getElementById('dppMonBtn').addEventListener('click', e => {
+      e.stopPropagation();
+      monList.classList.contains('open') ? closeMonList() : openMonList();
+    });
+
+    /* ── year button: click to type? nope, just nav arrows are enough ── */
+
+    /* ── cancel / ok ── */
+    document.getElementById('dppCancel').addEventListener('click', closePicker);
+    document.getElementById('dppOk').addEventListener('click', () => {
+      if (selDate && activeTarget) {
+        activeTarget.textContent = formatHR(selDate);
+      }
+      closePicker();
+    });
+
+    /* ── backdrop closes picker ── */
+    backdrop.addEventListener('click', closePicker);
+    /* stop popup clicks from bubbling to backdrop */
+    popup.addEventListener('click', e => e.stopPropagation());
+
+    /* ── wire triggers ── */
+    document.querySelectorAll('.dpp-trigger').forEach(el => {
+      el.addEventListener('click', () => openPicker(el));
+    });
+  })();
 
   // User dropdown
   (function() {
