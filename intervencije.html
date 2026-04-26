@@ -307,60 +307,111 @@
     .chk.on { background: var(--blue-500); border-color: var(--blue-500); }
 
     /* Calendar popup */
-    .cal-popup {
-      position: fixed; background: #fff;
-      border: 1px solid var(--grey-100); border-radius: 6px;
-      box-shadow: 0 8px 24px rgba(0,0,0,.12);
-      padding: 16px; z-index: 300; width: 292px; display: none;
+    /* ─── DATE PICKER ─── */
+    .dpp-trigger { cursor: pointer; transition: border-color .15s, background .15s; }
+    .dpp-trigger:hover { background: #f5fbfe; border-color: var(--blue-300); }
+    .dpp-backdrop { display: none; position: fixed; inset: 0; z-index: 490; }
+    .dpp-backdrop.open { display: block; }
+    .dpp-popup {
+      display: none; position: fixed; z-index: 491;
+      width: 360px; background: #fff;
+      border: 1px solid var(--grey-50); border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.13), 0 2px 6px rgba(0,0,0,.06);
+      font-family: 'Inter', sans-serif; overflow: visible;
     }
-    .cal-popup.open { display: block; }
-
-    .cal-nav-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-    .cal-nav-grp { display: flex; align-items: center; gap: 2px; }
-    .cal-btn {
-      width: 28px; height: 28px; border: none; background: none;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      border-radius: 4px; color: var(--grey-600);
+    .dpp-popup.open { display: block; }
+    .dpp-header { display: flex; align-items: center; padding: 16px 14px 10px; }
+    .dpp-month-wrap { display: flex; align-items: center; flex: 1; position: relative; }
+    .dpp-year-wrap  { display: flex; align-items: center; }
+    .dpp-nav {
+      width: 32px; height: 32px; border: none; background: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      border-radius: 50%; color: var(--grey-500); transition: background .1s;
     }
-    .cal-btn:hover { background: var(--bg-table); }
-    .cal-sel {
-      border: none; font-size: 14px; font-weight: 600; color: var(--grey-800);
-      background: none; cursor: pointer; font-family: 'Inter', sans-serif;
-      appearance: none; text-align: center;
+    .dpp-nav:hover { background: var(--bg-table); }
+    .dpp-mon-btn, .dpp-yr-btn {
+      border: none; background: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      color: var(--grey-800); display: flex; align-items: center; gap: 4px;
+      padding: 5px 7px; border-radius: 4px; transition: background .1s, color .1s;
+      white-space: nowrap;
     }
-
-    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
-    .cal-dname {
-      text-align: center; font-size: 12px; font-weight: 600;
-      color: var(--grey-400); padding: 6px 0;
+    .dpp-mon-btn:hover, .dpp-yr-btn:hover { background: var(--bg-table); }
+    .dpp-mon-btn.open { background: var(--bg-dropdown); color: var(--blue-500); }
+    .dpp-mode-toggle {
+      display: flex; margin: 0 14px 8px; border-radius: 6px;
+      background: var(--bg-table); padding: 3px;
     }
-    .cal-day {
-      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
-      border-radius: 50%; cursor: pointer; font-size: 13px; color: var(--grey-700);
+    .dpp-mode-btn {
+      flex: 1; border: none; background: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500;
+      color: var(--grey-500); padding: 5px 8px; border-radius: 4px;
+      transition: background .1s, color .1s;
+    }
+    .dpp-mode-btn.active {
+      background: #fff; color: var(--grey-800); font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,.12);
+    }
+    .dpp-weekdays { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 14px 2px; }
+    .dpp-wd {
+      height: 32px; display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700; color: var(--grey-300); letter-spacing: .4px;
+    }
+    .dpp-days { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 14px 4px; }
+    .dpp-d {
+      height: 38px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 14px; color: var(--grey-700);
+      position: relative; overflow: hidden;
+    }
+    .dpp-out { color: var(--grey-100); cursor: default; pointer-events: none; }
+    .dpp-dn {
+      width: 34px; height: 34px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; z-index: 1; flex-shrink: 0;
+      transition: background .1s, border-color .1s;
+    }
+    .dpp-d:hover:not(.dpp-out):not(.dpp-sel):not(.dpp-range-s):not(.dpp-range-e) > .dpp-dn {
+      background: var(--bg-table);
+    }
+    .dpp-d::before {
+      content: ''; position: absolute; top: 50%; transform: translateY(-50%);
+      height: 34px; background: var(--bg-dropdown); z-index: 0;
+      left: 0; right: 0; display: none;
+    }
+    .dpp-range-s::before { display: block; left: 50%; right: 0; }
+    .dpp-range-e::before { display: block; left: 0; right: 50%; }
+    .dpp-range-m::before { display: block; left: 0; right: 0; }
+    .dpp-range-s > .dpp-dn, .dpp-range-e > .dpp-dn {
+      background: var(--blue-500); color: #fff; font-weight: 600;
+    }
+    .dpp-today > .dpp-dn { border: 2px solid var(--blue-500); color: var(--blue-500); font-weight: 600; }
+    .dpp-sel > .dpp-dn { background: var(--blue-500) !important; color: #fff !important; font-weight: 600; }
+    .dpp-sel:hover > .dpp-dn { background: var(--blue-600) !important; }
+    .dpp-footer {
+      display: flex; align-items: center; justify-content: flex-end; gap: 4px;
+      padding: 10px 16px 14px; border-top: 1px solid var(--grey-50);
+    }
+    .dpp-cancel-btn, .dpp-ok-btn {
+      border: none; background: none; cursor: pointer;
+      font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;
+      color: var(--blue-500); padding: 8px 14px; border-radius: 4px;
       transition: background .1s;
     }
-    .cal-day.other { color: var(--grey-200); }
-    .cal-day:hover:not(.empty):not(.sel) { background: var(--bg-dropdown); }
-    .cal-day.today { border: 2px solid var(--blue-500); font-weight: 600; color: var(--blue-500); }
-    .cal-day.sel   { background: var(--blue-500) !important; color: #fff !important; border: none; }
-    .cal-day.empty { cursor: default; }
-
-    .cal-footer {
-      display: flex; justify-content: flex-end; gap: 8px;
-      margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--grey-50);
+    .dpp-cancel-btn:hover, .dpp-ok-btn:hover { background: var(--bg-dropdown); }
+    .dpp-mon-list {
+      position: absolute; top: 36px; left: 32px;
+      width: 148px; background: #fff;
+      border: 1px solid var(--grey-50); border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      overflow-y: auto; max-height: 228px; z-index: 10; display: none;
     }
-    .cal-cancel {
-      padding: 6px 16px; background: none; border: none;
-      font-size: 14px; font-weight: 600; color: var(--grey-500);
-      cursor: pointer; border-radius: 4px; font-family: 'Inter', sans-serif;
+    .dpp-mon-list.open { display: block; }
+    .dpp-mon-opt {
+      padding: 10px 16px; font-size: 14px; color: var(--grey-700);
+      cursor: pointer; font-weight: 500; transition: background .1s;
     }
-    .cal-cancel:hover { background: var(--bg-table); }
-    .cal-ok {
-      padding: 6px 20px; background: var(--blue-500); border: none;
-      font-size: 14px; font-weight: 600; color: #fff;
-      cursor: pointer; border-radius: 4px; font-family: 'Inter', sans-serif;
-    }
-    .cal-ok:hover { background: var(--blue-600); }
+    .dpp-mon-opt:hover { background: var(--bg-table); }
+    .dpp-mon-opt.sel { background: var(--bg-dropdown); color: var(--blue-500); font-weight: 600; }
 
     /* ─── DETAIL PAGE ──────────────────────────────── */
     #detailPage {
@@ -667,33 +718,49 @@
   <div class="dd-list" id="ddList"></div>
 </div>
 
-<!-- ════════════════════ CALENDAR POPUP ══════════════════ -->
-<div class="overlay-back" id="calBack"></div>
-<div class="cal-popup" id="calPopup">
-  <div class="cal-nav-row">
-    <div class="cal-nav-grp">
-      <button class="cal-btn" id="calPrevM">
-        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="#403f3f"/></svg>
+<!-- ════════════════════ DATE PICKER POPUP ══════════════════ -->
+<div class="dpp-backdrop" id="dppBackdrop"></div>
+<div class="dpp-popup" id="dppPopup">
+  <div class="dpp-header">
+    <div class="dpp-month-wrap">
+      <button class="dpp-nav" id="dppPrevMon" title="Prethodni mjesec">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg>
       </button>
-      <select class="cal-sel" id="calMonthSel"></select>
-      <button class="cal-btn" id="calNextM">
-        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="#403f3f"/></svg>
+      <button class="dpp-mon-btn" id="dppMonBtn">
+        <span id="dppMonLabel">Sij</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
       </button>
+      <button class="dpp-nav" id="dppNextMon" title="Sljedeći mjesec">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>
+      </button>
+      <div class="dpp-mon-list" id="dppMonList"></div>
     </div>
-    <div class="cal-nav-grp">
-      <button class="cal-btn" id="calPrevY">
-        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="#403f3f"/></svg>
+    <div class="dpp-year-wrap">
+      <button class="dpp-nav" id="dppPrevYr" title="Prethodna godina">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z" fill="currentColor"/></svg>
       </button>
-      <select class="cal-sel" id="calYearSel"></select>
-      <button class="cal-btn" id="calNextY">
-        <svg width="16" height="16" viewBox="0 0 24 24"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="#403f3f"/></svg>
+      <button class="dpp-yr-btn" id="dppYrBtn">
+        <span id="dppYrLabel">2026</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      </button>
+      <button class="dpp-nav" id="dppNextYr" title="Sljedeća godina">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" fill="currentColor"/></svg>
       </button>
     </div>
   </div>
-  <div class="cal-grid" id="calGrid"></div>
-  <div class="cal-footer">
-    <button class="cal-cancel" id="calCancelBtn">Cancel</button>
-    <button class="cal-ok" id="calOkBtn">OK</button>
+  <div class="dpp-mode-toggle">
+    <button class="dpp-mode-btn active" data-mode="single">Dan</button>
+    <button class="dpp-mode-btn" data-mode="range">Raspon datuma</button>
+  </div>
+  <div class="dpp-weekdays">
+    <div class="dpp-wd">P</div><div class="dpp-wd">U</div><div class="dpp-wd">S</div>
+    <div class="dpp-wd">Č</div><div class="dpp-wd">P</div><div class="dpp-wd">S</div>
+    <div class="dpp-wd">N</div>
+  </div>
+  <div class="dpp-days" id="dppDays"></div>
+  <div class="dpp-footer">
+    <button class="dpp-cancel-btn" id="dppCancel">Odustani</button>
+    <button class="dpp-ok-btn"     id="dppOk">OK</button>
   </div>
 </div>
 
@@ -1262,7 +1329,6 @@ const ICON_ARROW = `<svg class="sort-arrow" width="13" height="13" viewBox="0 0 
 /* ═══════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════════ */
-let calState    = { year: 2025, month: 7, selected: null };
 let dateValue   = null;
 let filtersActive = false;
 let sortState   = { key: null, dir: 'asc' };
@@ -1594,109 +1660,274 @@ document.getElementById('ddClearBtn').addEventListener('click', () => {
 /* ═══════════════════════════════════════════════
    CALENDAR
 ═══════════════════════════════════════════════ */
-const calPopup = document.getElementById('calPopup');
-const calBack  = document.getElementById('calBack');
-const dateTrigger = document.getElementById('dateTrigger');
+// ─── DATE PICKER (filter) ─────────────────────────────────────────────────
+(function() {
+  const MONTHS_SHORT = ['Sij','Velj','Ožu','Tra','Svi','Lip','Srp','Kol','Ruj','Lis','Stu','Pro'];
+  const MONTHS_FULL  = ['Siječanj','Veljača','Ožujak','Travanj','Svibanj','Lipanj',
+                        'Srpanj','Kolovoz','Rujan','Listopad','Studeni','Prosinac'];
 
-function renderCalendar() {
-  const { year, month, selected } = calState;
-  const today = new Date();
+  const popup      = document.getElementById('dppPopup');
+  const backdrop   = document.getElementById('dppBackdrop');
+  const daysEl     = document.getElementById('dppDays');
+  const monLabel   = document.getElementById('dppMonLabel');
+  const yrLabel    = document.getElementById('dppYrLabel');
+  const monList    = document.getElementById('dppMonList');
+  const trigger    = document.getElementById('dateTrigger');
+  const triggerTxt = document.getElementById('dateTriggerText');
+  const triggerFlt = document.getElementById('dateFloat');
 
-  // Month select
-  const mSel = document.getElementById('calMonthSel');
-  mSel.innerHTML = MONTHS.map((m,i) => `<option value="${i}" ${i===month?'selected':''}>${m}</option>`).join('');
+  let curYear, curMonth;
+  let mode       = 'single';
+  let selDate    = null;
+  let rangeStart = null;
+  let rangeEnd   = null;
+  let rangeStep  = 0;
+  let hoverDate  = null;
 
-  // Year select
-  const ySel = document.getElementById('calYearSel');
-  ySel.innerHTML = '';
-  for (let y = 2020; y <= 2030; y++) {
-    ySel.innerHTML += `<option value="${y}" ${y===year?'selected':''}>${y}</option>`;
+  function parseHR(str) {
+    if (!str || !str.trim()) return null;
+    const parts = str.replace(/\./g, ' ').trim().split(/\s+/);
+    if (parts.length < 3) return null;
+    const d = parseInt(parts[0]), m = parseInt(parts[1]) - 1, y = parseInt(parts[2]);
+    if (isNaN(d) || isNaN(m) || isNaN(y)) return null;
+    return new Date(y, m, d);
+  }
+  function formatHR(date) {
+    return date.getDate() + '.' + (date.getMonth()+1) + '.' + date.getFullYear() + '.';
+  }
+  function dateEq(a, b) {
+    return a && b &&
+      a.getFullYear()===b.getFullYear() &&
+      a.getMonth()===b.getMonth() &&
+      a.getDate()===b.getDate();
   }
 
-  // Days
-  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
-  const daysInMonth = new Date(year, month+1, 0).getDate();
-  const daysInPrev  = new Date(year, month, 0).getDate();
+  function renderGrid() {
+    monLabel.textContent = MONTHS_SHORT[curMonth];
+    yrLabel.textContent  = curYear;
+    monList.querySelectorAll('.dpp-mon-opt').forEach((el, i) => {
+      el.classList.toggle('sel', i === curMonth);
+    });
 
-  const grid = document.getElementById('calGrid');
-  const dayNames = ['S','M','T','W','T','F','S'];
-  grid.innerHTML = dayNames.map(d => `<div class="cal-dname">${d}</div>`).join('');
+    const today       = new Date();
+    const firstDay    = new Date(curYear, curMonth, 1);
+    const startOffset = (firstDay.getDay() + 6) % 7;
+    const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+    const daysInPrev  = new Date(curYear, curMonth, 0).getDate();
+    const totalCells  = Math.ceil((startOffset + daysInMonth) / 7) * 7;
 
-  // Previous month tail
-  for (let i = firstDay - 1; i >= 0; i--) {
-    grid.innerHTML += `<div class="cal-day other">${daysInPrev - i}</div>`;
+    let rS = rangeStart;
+    let rE = (mode === 'range' && rangeStep === 1 && hoverDate) ? hoverDate : rangeEnd;
+    let lo = null, hi = null;
+    if (rS && rE) { lo = rS <= rE ? rS : rE; hi = rS <= rE ? rE : rS; }
+
+    let html = '';
+    for (let i = 0; i < totalCells; i++) {
+      let day, month, year, isOut = false;
+      if (i < startOffset) {
+        day = daysInPrev - startOffset + i + 1;
+        month = curMonth - 1; year = curYear;
+        if (month < 0) { month = 11; year--; }
+        isOut = true;
+      } else if (i >= startOffset + daysInMonth) {
+        day = i - startOffset - daysInMonth + 1;
+        month = curMonth + 1; year = curYear;
+        if (month > 11) { month = 0; year++; }
+        isOut = true;
+      } else {
+        day = i - startOffset + 1; month = curMonth; year = curYear;
+      }
+      const td = new Date(year, month, day);
+      const isToday = dateEq(td, today);
+      let cls = 'dpp-d';
+      if (isOut) cls += ' dpp-out';
+
+      if (mode === 'single') {
+        if (dateEq(td, selDate))  cls += ' dpp-sel';
+        else if (isToday)         cls += ' dpp-today';
+      } else {
+        if (lo && hi && !dateEq(lo, hi)) {
+          if (dateEq(td, lo))         cls += ' dpp-range-s';
+          else if (dateEq(td, hi))    cls += ' dpp-range-e';
+          else if (td > lo && td < hi) cls += ' dpp-range-m';
+          if (!cls.includes('range') && isToday) cls += ' dpp-today';
+        } else if (lo && hi && dateEq(lo, hi)) {
+          if (dateEq(td, lo))  cls += ' dpp-sel';
+          else if (isToday)    cls += ' dpp-today';
+        } else if (rangeStart && rangeStep === 1 && !rE) {
+          if (dateEq(td, rangeStart)) cls += ' dpp-sel';
+          else if (isToday)           cls += ' dpp-today';
+        } else {
+          if (isToday) cls += ' dpp-today';
+        }
+      }
+
+      html += `<div class="${cls}" data-y="${year}" data-m="${month}" data-d="${day}"><span class="dpp-dn">${day}</span></div>`;
+    }
+    daysEl.innerHTML = html;
+
+    daysEl.querySelectorAll('.dpp-d:not(.dpp-out)').forEach(el => {
+      el.addEventListener('click', () => {
+        const d = new Date(+el.dataset.y, +el.dataset.m, +el.dataset.d);
+        if (mode === 'single') {
+          selDate = d;
+        } else {
+          if (rangeStep === 0 || rangeStep === 2) {
+            rangeStart = d; rangeEnd = null; rangeStep = 1; hoverDate = null;
+          } else {
+            rangeEnd = d; rangeStep = 2; hoverDate = null;
+          }
+        }
+        renderGrid();
+      });
+      if (mode === 'range') {
+        el.addEventListener('mouseenter', () => {
+          if (rangeStep === 1) {
+            hoverDate = new Date(+el.dataset.y, +el.dataset.m, +el.dataset.d);
+            renderGrid();
+          }
+        });
+      }
+    });
   }
 
-  for (let d = 1; d <= daysInMonth; d++) {
-    const isToday = today.getFullYear()===year && today.getMonth()===month && today.getDate()===d;
-    const isSel   = selected && selected.year===year && selected.month===month && selected.day===d;
-    grid.innerHTML += `<div class="cal-day ${isToday?'today':''} ${isSel?'sel':''}" onclick="selectDay(${d})">${d}</div>`;
+  function buildMonList() {
+    monList.innerHTML = MONTHS_FULL.map((name, i) =>
+      `<div class="dpp-mon-opt${i===curMonth?' sel':''}" data-m="${i}">${name}</div>`
+    ).join('');
+    monList.querySelectorAll('.dpp-mon-opt').forEach(el => {
+      el.addEventListener('click', e => {
+        e.stopPropagation(); curMonth = +el.dataset.m; renderGrid(); closeMonList();
+      });
+    });
+  }
+  function openMonList()  { buildMonList(); monList.classList.add('open'); document.getElementById('dppMonBtn').classList.add('open'); }
+  function closeMonList() { monList.classList.remove('open'); document.getElementById('dppMonBtn').classList.remove('open'); }
+
+  function setModeUI(m) {
+    mode = m;
+    document.querySelectorAll('.dpp-mode-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.mode === m);
+    });
   }
 
-  // Next month fill
-  const totalCells = firstDay + daysInMonth;
-  const remaining  = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
-  for (let d = 1; d <= remaining; d++) {
-    grid.innerHTML += `<div class="cal-day other">${d}</div>`;
+  function openPicker() {
+    const existing = triggerTxt ? triggerTxt.textContent.trim() : '';
+    rangeStart = null; rangeEnd = null; rangeStep = 0; hoverDate = null;
+
+    if (existing.includes('–')) {
+      const parts = existing.split('–');
+      const s = parseHR(parts[0].trim()), e = parseHR(parts[1] && parts[1].trim());
+      if (s && e) {
+        setModeUI('range');
+        rangeStart = s; rangeEnd = e; rangeStep = 2;
+        curYear = s.getFullYear(); curMonth = s.getMonth();
+      } else {
+        setModeUI('single');
+        selDate = new Date(); curYear = selDate.getFullYear(); curMonth = selDate.getMonth();
+      }
+    } else {
+      setModeUI('single');
+      const parsed = parseHR(existing);
+      selDate = parsed || new Date();
+      curYear = selDate.getFullYear(); curMonth = selDate.getMonth();
+    }
+
+    renderGrid();
+
+    const rect = trigger.getBoundingClientRect();
+    let left = Math.min(rect.left, window.innerWidth - 380);
+    popup.style.left = left + 'px';
+    const spaceBelow = window.innerHeight - rect.bottom;
+    if (spaceBelow >= 380) {
+      popup.style.top    = (rect.bottom + 6) + 'px';
+      popup.style.bottom = 'auto';
+    } else {
+      popup.style.bottom = (window.innerHeight - rect.top + 6) + 'px';
+      popup.style.top    = 'auto';
+    }
+    popup.classList.add('open');
+    backdrop.classList.add('open');
   }
-}
 
-function selectDay(d) {
-  calState.selected = { year: calState.year, month: calState.month, day: d };
-  renderCalendar();
-}
-
-function openCalendar() {
-  const rect = dateTrigger.getBoundingClientRect();
-  calPopup.style.top  = (rect.bottom + 4) + 'px';
-  calPopup.style.left = rect.left + 'px';
-  calPopup.classList.add('open');
-  calBack.classList.add('open');
-  dateTrigger.classList.add('open');
-  renderCalendar();
-}
-
-function closeCalendar(save) {
-  calPopup.classList.remove('open');
-  calBack.classList.remove('open');
-  dateTrigger.classList.remove('open');
-  if (save && calState.selected) {
-    const { year, month, day } = calState.selected;
-    const label = `${day}.${month+1}.${year}.`;
-    dateValue = label;
-    const txt = document.getElementById('dateTriggerText');
-    const flt = document.getElementById('dateFloat');
-    txt.textContent = label;
-    txt.style.color = 'var(--grey-800)';
-    dateTrigger.classList.add('has-value');
-    flt.style.display = 'block';
-    updateResetVisibility();
+  function closePicker(save) {
+    popup.classList.remove('open');
+    backdrop.classList.remove('open');
+    closeMonList();
+    if (save) {
+      let label = null;
+      if (mode === 'single' && selDate) {
+        label = formatHR(selDate);
+      } else if (mode === 'range' && rangeStart && rangeEnd) {
+        const lo = rangeStart <= rangeEnd ? rangeStart : rangeEnd;
+        const hi = rangeStart <= rangeEnd ? rangeEnd : rangeStart;
+        label = formatHR(lo) + ' – ' + formatHR(hi);
+      }
+      if (label) {
+        dateValue = label;
+        triggerTxt.textContent = label;
+        triggerTxt.style.color = 'var(--grey-800)';
+        trigger.classList.add('has-value');
+        if (triggerFlt) { triggerFlt.style.display = 'block'; }
+        updateResetVisibility();
+      }
+    }
   }
-}
 
-dateTrigger.addEventListener('click', () => {
-  calPopup.classList.contains('open') ? closeCalendar(false) : openCalendar();
-});
-calBack.addEventListener('click', () => closeCalendar(false));
-document.getElementById('calCancelBtn').addEventListener('click', () => closeCalendar(false));
-document.getElementById('calOkBtn').addEventListener('click', () => closeCalendar(true));
+  // Navigation
+  document.getElementById('dppPrevMon').addEventListener('click', () => {
+    curMonth--; if (curMonth < 0) { curMonth = 11; curYear--; } renderGrid();
+  });
+  document.getElementById('dppNextMon').addEventListener('click', () => {
+    curMonth++; if (curMonth > 11) { curMonth = 0; curYear++; } renderGrid();
+  });
+  document.getElementById('dppPrevYr').addEventListener('click', () => { curYear--; renderGrid(); });
+  document.getElementById('dppNextYr').addEventListener('click', () => { curYear++; renderGrid(); });
+  document.getElementById('dppMonBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    monList.classList.contains('open') ? closeMonList() : openMonList();
+  });
 
-document.getElementById('calMonthSel').addEventListener('change', e => {
-  calState.month = +e.target.value; renderCalendar();
-});
-document.getElementById('calYearSel').addEventListener('change', e => {
-  calState.year = +e.target.value; renderCalendar();
-});
-document.getElementById('calPrevM').addEventListener('click', () => {
-  if (calState.month === 0) { calState.month=11; calState.year--; } else calState.month--;
-  renderCalendar();
-});
-document.getElementById('calNextM').addEventListener('click', () => {
-  if (calState.month === 11) { calState.month=0; calState.year++; } else calState.month++;
-  renderCalendar();
-});
-document.getElementById('calPrevY').addEventListener('click', () => { calState.year--; renderCalendar(); });
-document.getElementById('calNextY').addEventListener('click', () => { calState.year++; renderCalendar(); });
+  // Mode toggle
+  document.querySelectorAll('.dpp-mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const newMode = btn.dataset.mode;
+      if (newMode === mode) return;
+      setModeUI(newMode);
+      if (newMode === 'single') {
+        selDate = new Date();
+        rangeStart = null; rangeEnd = null; rangeStep = 0; hoverDate = null;
+      } else {
+        selDate = null;
+        rangeStart = null; rangeEnd = null; rangeStep = 0; hoverDate = null;
+      }
+      renderGrid();
+    });
+  });
+
+  // Cancel / OK
+  document.getElementById('dppCancel').addEventListener('click', () => closePicker(false));
+  document.getElementById('dppOk').addEventListener('click',     () => closePicker(true));
+
+  // Backdrop
+  backdrop.addEventListener('click', () => closePicker(false));
+  popup.addEventListener('click', e => e.stopPropagation());
+
+  // Trigger
+  trigger.addEventListener('click', () => {
+    popup.classList.contains('open') ? closePicker(false) : openPicker();
+  });
+
+  // Expose reset for external use
+  window._dppReset = function() {
+    dateValue = null;
+    selDate = null; rangeStart = null; rangeEnd = null; rangeStep = 0; hoverDate = null;
+    setModeUI('single');
+    if (triggerTxt) { triggerTxt.textContent = 'Odabir datuma'; triggerTxt.style.color = 'var(--grey-300)'; }
+    if (triggerFlt) triggerFlt.style.display = 'none';
+    trigger.classList.remove('has-value');
+  };
+})();
 
 /* ═══════════════════════════════════════════════
    RESET VISIBILITY — reactive, based on any filter value
@@ -1737,11 +1968,7 @@ document.getElementById('fetchBtn').addEventListener('click', () => {
 document.getElementById('resetBtn').addEventListener('click', () => {
   searchInput.value = ''; searchInput.classList.remove('has-value');
   partners.forEach(p => p.checked = false); updatePartnerTrigger();
-  dateValue = null; calState.selected = null;
-  document.getElementById('dateTriggerText').textContent = 'Odabir datuma';
-  document.getElementById('dateTriggerText').style.color = 'var(--grey-300)';
-  dateTrigger.classList.remove('has-value');
-  document.getElementById('dateFloat').style.display = 'none';
+  if (window._dppReset) window._dppReset();
   filtersActive = false;
   currentData = [...rows]; sortState = { key: null, dir: 'asc' };
   renderHeader(); renderTableBody(currentData);
